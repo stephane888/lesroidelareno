@@ -1,0 +1,7 @@
+services:
+  lesroidelareno.path_processor:
+    class: Drupal\lesroidelareno\HttpKernel\LesroidelarenoPathProcessor
+    arguments: ['@domain.negotiator', '@module_handler', '@entity_type.manager', '@path_alias.manager', '@config.factory']
+    tags:
+      - { name: path_processor_outbound, priority: 90 }
+  

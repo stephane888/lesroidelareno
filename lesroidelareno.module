@@ -1,0 +1,330 @@
+<?php
+use Drupal\commerce_product\Entity\ProductType;
+use Drupal\commerce_product\Entity\ProductVariationType;
+use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
+use Drupal\Core\Entity\EntityInterface;
+use Drupal\views\ViewExecutable;
+use Drupal\Core\Access\AccessResult;
+use Stephane888\Debug\debugLog;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\wbumenudomain\WbumenudomainMenuItemDecorating;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\file\Entity\File;
+use Drupal\image\Entity\ImageStyle;
+use Drupal\Core\Url;
+use Drupal\Component\Utility\Html;
+
+function lesroidelareno_preprocess_html(&$vars) {
+  $parameters = \Drupal::routeMatch()->getParameters()->all();
+  if (!empty($parameters['content_generate_entity'])) {
+    /**
+     *
+     * @var \Drupal\generate_mapping_content\Entity\ContentGenerateEntity $contentGenerate
+     */
+    $contentGenerate = $parameters['content_generate_entity'];
+    $intro = $contentGenerate->get('introduction')->value;
+    $metaDescription = [
+      '#tag' => 'meta',
+      '#attributes' => [
+        'name' => 'description',
+        'content' => strip_tags($intro)
+      ]
+    ];
+    $vars['page']['#attached']['html_head'][] = [
+      $metaDescription,
+      'meta-description'
+    ];
+  }
+}
+
+function lesroidelareno_preprocess_facets_result_item__checkbox(&$vars) {
+  
+  // if (!empty($vars['items'])) {
+  // foreach ($vars['items'] as $k => $item) {
+  // $vars['items'][$k]['value']['#title']['icone'] = [
+  // '#type' => 'html_tag',
+  // '#tag' => 'h1',
+  // '#value' => 'Icone'
+  // ];
+  // }
+  // }
+  $term = \Drupal::entityTypeManager()->getStorage('taxonomy_term')->loadByProperties([
+    'name' => $vars['value'],
+    'vid' => 'categorie_produit'
+  ]);
+  $image_style = 'thumbnail';
+  /**
+   *
+   * @var \Drupal\taxonomy\Entity\Term $term
+   */
+  $field_name = 'field_image';
+  $term = reset($term);
+  if ($term->hasField($field_name)) {
+    $first = $term->get($field_name)->first();
+    if ($first) {
+      $file = File::load($first->getValue()['target_id']);
+      if ($file)
+        $vars['icone'] = [
+          '#theme' => 'image_style',
+          '#style_name' => $image_style,
+          '#uri' => $file->getFileUri()
+        ];
+    }
+    else {
+      $settings = $term->get($field_name)->getSettings();
+      
+      // dump($settings['default_image']);
+      if (!empty($settings['default_image'])) {
+        $fileManager = \Drupal::entityTypeManager()->getStorage('file');
+        /**
+         *
+         * @var File $file
+         */
+        $file = $fileManager->loadByProperties([
+          'uuid' => $settings['default_image']['uuid']
+        ]);
+        if (!empty($file)) {
+          $file = reset($file);
+          $vars['icone'] = [
+            '#theme' => 'image_style',
+            '#style_name' => $image_style,
+            '#uri' => $file->getFileUri()
+          ];
+        }
+      }
+    }
+  }
+  //
+}
+
+/**
+ * Cette function est provisoir, elle corrige un bug au niveau de 'target_id';
+ *
+ * @param array $variables
+ */
+function lesroidelareno_preprocess_pager(array &$variables) {
+  $element = $variables['pager']['#element'];
+  $parameters = $variables['pager']['#parameters'];
+  // $quantity = empty($variables['pager']['#quantity']) ? 0 : $variables['pager']['#quantity'];
+  $route_name = $variables['pager']['#route_name'];
+  $route_parameters = $variables['pager']['#route_parameters'] ?? [];
+  /** @var \Drupal\Core\Pager\PagerManagerInterface $pager_manager */
+  // Drupal\Core\Pager\PagerManager
+  $pager_manager = \Drupal::service('pager.manager');
+  $pager = $pager_manager->getPager($element);
+  if ($pager) {
+    $current_page = $pager->getCurrentPage();
+    $pager_max = $pager->getTotalPages();
+    // clean parametter
+    foreach ($parameters as $k => $value) {
+      if (is_array($value)) {
+        foreach ($value as $b => $val) {
+          if (isset($val['target_id'])) {
+            $parameters[$k][$b] = $val['target_id'];
+          }
+        }
+      }
+    }
+    
+    /**
+     * On recrit les url pour les cas ou ces derniers contientienne target_id.
+     */
+    // pages
+    if (!empty($variables['items']['pages'])) {
+      foreach ($variables['items']['pages'] as $i => $page) {
+        $options = [
+          'query' => $pager_manager->getUpdatedParameters($parameters, $element, $i - 1)
+        ];
+        $variables['items']['pages'][$i]['href'] = Url::fromRoute($route_name, $route_parameters, $options)->toString();
+      }
+    }
+    // first
+    if (!empty($variables['items']['first'])) {
+      $options = [
+        'query' => $pager_manager->getUpdatedParameters($parameters, $element, 0)
+      ];
+      $variables['items']['first']['href'] = Url::fromRoute($route_name, $route_parameters, $options)->toString();
+    }
+    // previous
+    if (!empty($variables['items']['previous'])) {
+      $options = [
+        'query' => $pager_manager->getUpdatedParameters($parameters, $element, $current_page - 1)
+      ];
+      $variables['items']['previous']['href'] = Url::fromRoute($route_name, $route_parameters, $options)->toString();
+    }
+    // Next
+    if (!empty($variables['items']['next'])) {
+      $options = [
+        'query' => $pager_manager->getUpdatedParameters($parameters, $element, $current_page + 1)
+      ];
+      $variables['items']['next']['href'] = Url::fromRoute($route_name, $route_parameters, $options)->toString();
+    }
+    // last
+    if (!empty($variables['items']['last'])) {
+      $options = [
+        'query' => $pager_manager->getUpdatedParameters($parameters, $element, $pager_max - 1)
+      ];
+      $variables['items']['last']['href'] = Url::fromRoute($route_name, $route_parameters, $options)->toString();
+    }
+  }
+}
+
+/**
+ *
+ * @file
+ * Primary module hooks for lesroidelareno module.
+ *
+ * @DCG
+ * This file is no longer required in Drupal 8.
+ * @see https://www.drupal.org/node/2217931
+ */
+function lesroidelareno_views_pre_build(ViewExecutable $view) {
+  /**
+   *
+   * @var \Drupal\node\Entity\Node $node
+   */
+  $node = \Drupal::routeMatch()->getParameter('node');
+  if ($node) {
+    if (!empty($node->field_selectionner_le_domaine) && $view->id() == 'realisations_par_prestataires') {
+      /**
+       *
+       * @var \Drupal\Core\Field\FieldItemList $field
+       */
+      $field = $node->field_selectionner_le_domaine;
+      $args = [];
+      
+      foreach ($field->getValue() as $val) {
+        $args[] = $val['value'];
+        $args[] = $val['value'];
+      }
+      
+      $view->setArguments($args);
+    }
+    //
+    elseif ($view->id() == 'produits_simialires' && $view->current_display == 'block_4') {
+      /**
+       *
+       * @var \Drupal\Core\Field\FieldItemList $field
+       */
+      $field = $node->field_selectionner_le_domaine;
+      $args = [];
+      foreach ($field->getValue() as $val) {
+        $args[] = $val['value'];
+      }
+      $view->setArguments($args);
+    }
+  }
+}
+
+/**
+ * implement hook_preprocess_
+ */
+function lesroidelareno_preprocess_views_view_unformatted__produits_simialires(&$vars) {
+  /**
+   *
+   * @var ViewExecutable $view
+   */
+  $view = $vars['view'];
+  if ($view->current_display === 'block_3')
+    foreach ($vars['rows'] as $key => $row) {
+      if (isset($row['content']['#view_mode'])) {
+        $template = _lesroidelareno_get_product_theme($vars['rows'][$key]['content']['#commerce_product']);
+        $vars['rows'][$key]['content']['#view_mode'] = $template;
+        $vars['rows'][$key]['content']['#cache']['keys'][3] = $template;
+      }
+    }
+}
+
+function _lesroidelareno_get_product_theme(Drupal\commerce_product\Entity\Product $product) {
+  $val = $product->get('field_en_promotion_sur_les_roide')->offsetGet(0)->getValue();
+  if (!empty($val['value'])) {
+    return 'teaser_externe';
+  }
+  else {
+    return 'teaser';
+  }
+}
+
+function lesroidelareno_preprocess_commerce_product(&$vars) {
+  $activeDomain = WbumenudomainMenuItemDecorating::getCurrentActiveDomaineByUrl();
+  $vars['external_domaine'] = false;
+  $vars['vendu_en_magazin'] = false;
+  /**
+   *
+   * @var \Drupal\commerce_product\Entity\Product $product
+   */
+  $product = $vars['product_entity'];
+  $domain = $product->get('field_domain_access')->offsetGet(0)->getValue();
+  
+  if (!empty($domain) && !empty($activeDomain)) {
+    if ($domain['value'] !== $activeDomain) {
+      $vars['external_domaine'] = true;
+    }
+  }
+  
+  // dump($vars['elements']['#commerce_product']);
+  /**
+   *
+   * @var \Drupal\commerce_product\Entity\Product $commerce_product
+   */
+  $commerce_product = $vars['elements']['#commerce_product'];
+  if ($commerce_product->hasField('field_prestataires')) {
+    $field = $commerce_product->get('field_prestataires')->first();
+    if ($field) {
+      $vars['vendu_en_magazin'] = true;
+    }
+  }
+}
+
+/**
+ * implement hook_entity_base_field_info
+ * use command to update : vendor/bin/drush entup
+ *
+ * @file
+ * Primary module hooks for wbumenudomain module.
+ *
+ * @see https://www.drupal.org/docs/drupal-apis/entity-api/fieldtypes-fieldwidgets-and-fieldformatters to get all types BaseFieldDefinition;
+ *     
+ * @DCG
+ * This file is no longer required in Drupal 8.
+ * @see https://www.drupal.org/node/2217931
+ */
+function lesroidelareno_entity_base_field_info(EntityTypeInterface $entity_type) {
+  $fields = [];
+  if ($entity_type->id() === 'block_content') {
+    $fields['user_id'] = BaseFieldDefinition::create('entity_reference')->setLabel(t(' User Name '))->setRequired(TRUE)->setDescription(t('The Name of the associated user.'))->setSetting('target_type', 'user')->setSetting('handler', 'default')->setDisplayOptions('view', array(
+      'label' => 'above',
+      'type' => 'entity_reference_label',
+      'weight' => -3
+    ))->setDisplayOptions('form', [
+      'type' => 'entity_reference_autocomplete',
+      'settings' => array(
+        'match_operator' => 'CONTAINS',
+        'size' => 60,
+        'autocomplete_type' => 'tags',
+        'placeholder' => ''
+      ),
+      'weight' => -3
+    ])->setDisplayConfigurable('form', TRUE)->setDisplayConfigurable('view', TRUE)->setDefaultValueCallback('\Drupal\lesroidelareno\lesroidelareno::getCurrentUser');
+    return $fields;
+  }
+  return $fields;
+}
+
+/**
+ * implement hook_ENTITY_TYPE_access
+ */
+function lesroidelareno_commerce_product_variation_access(\Drupal\Core\Entity\EntityInterface $entity, $operation, \Drupal\Core\Session\AccountInterface $account) {
+  
+  // if ($operation === 'view')
+  return AccessResult::allowed();
+}
+
+/**
+ * implement hook_ENTITY_TYPE_access
+ */
+// function lesroidelareno_block_content_access(\Drupal\Core\Entity\EntityInterface $entity, $operation, \Drupal\Core\Session\AccountInterface $account) {
+//   // dump($operation);
+// }
+
+

@@ -1,0 +1,6 @@
+name: lesroidelareno
+type: module
+description: Contient des focntionnaitée specifique au site lesroidelareno.fr
+package: Custom
+core: 8.x
+core_version_requirement: ^8 || ^9

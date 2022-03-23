@@ -1,0 +1,4 @@
+administer lesroidelareno configuration:
+  title: 'Administer lesroidelareno configuration'
+  description: 'Optional description.'
+  restrict access: true
