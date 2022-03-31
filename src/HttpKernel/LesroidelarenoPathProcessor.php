@@ -12,7 +12,7 @@ use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Url;
 use Symfony\Component\HttpFoundation\Request;
 use Drupal\Core\Entity\EntityInterface;
-use Stephane888\Debug\debugLog;
+
 use Drupal\domain_access\DomainAccessManagerInterface;
 use Drupal\commerce_product\Entity\Product;
 
@@ -154,7 +154,7 @@ class LesroidelarenoPathProcessor implements OutboundPathProcessorInterface {
       // //
       // if ($options['route_name'] == 'entity.commerce_product.canonical') {
       // // dump($node->toUrl()->toString());
-      // debugLog::kintDebugDrupal($options, 'commerce_product__options', true);
+      
       // $optionsUrl = [
       // 'absolute' => false
       // ];
@@ -240,4 +240,3 @@ class LesroidelarenoPathProcessor implements OutboundPathProcessorInterface {
   }
   
 }
-

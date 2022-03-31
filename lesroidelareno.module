@@ -5,7 +5,6 @@ use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
 use Drupal\views\ViewExecutable;
 use Drupal\Core\Access\AccessResult;
-use Stephane888\Debug\debugLog;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\wbumenudomain\WbumenudomainMenuItemDecorating;
 use Drupal\Core\Field\BaseFieldDefinition;
@@ -258,6 +257,7 @@ function lesroidelareno_preprocess_commerce_product(&$vars) {
   $activeDomain = WbumenudomainMenuItemDecorating::getCurrentActiveDomaineByUrl();
   $vars['external_domaine'] = false;
   $vars['vendu_en_magazin'] = false;
+  $vars['localisation'] = false;
   
   /**
    *
@@ -280,6 +280,9 @@ function lesroidelareno_preprocess_commerce_product(&$vars) {
   $commerce_product = $vars['elements']['#commerce_product'];
   if ($commerce_product->hasField('field_prestataires') || $commerce_product->hasField('field_url_partenaire_exterieur') && $commerce_product->hasField('field_nom_partenaire_exterieur')) {
     $fieldPartenaire = $commerce_product->get('field_prestataires')->first();
+    /**
+     * Vendu par un partenaire enregistrer sur lesroisdelareno.
+     */
     if ($fieldPartenaire) {
       $nid = $fieldPartenaire->getValue();
       if (!empty($nid['target_id'])) {
@@ -312,6 +315,9 @@ function lesroidelareno_preprocess_commerce_product(&$vars) {
           'node' => $nid['target_id']
         ], $optionsUrl);
         $vars['product_url'] = $url->toString();
+        $vars['localisation'] = $node->get('field_localisation')->view([
+          'label' => 'hidden'
+        ]);
       }
     }
     else {
@@ -325,6 +331,7 @@ function lesroidelareno_preprocess_commerce_product(&$vars) {
         $tid = $namePartenaire->getValue();
         if (!empty($url['value']) && $tid['target_id']) {
           $vars['product_url'] = $url['value'];
+          $vars['localisation'] = $vars['product']['field_localisation'];
           /**
            * Load name term.
            */
