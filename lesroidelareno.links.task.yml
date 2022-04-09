@@ -1,0 +1,26 @@
+# Donnee site internet des utilisateurs routing definition
+donnee_internet_entity.settings_tab:
+  route_name: donnee_internet_entity.settings
+  title: "Settings"
+  base_route: donnee_internet_entity.settings
+
+entity.donnee_internet_entity.canonical:
+  route_name: entity.donnee_internet_entity.canonical
+  base_route: entity.donnee_internet_entity.canonical
+  title: "View"
+
+entity.donnee_internet_entity.edit_form:
+  route_name: entity.donnee_internet_entity.edit_form
+  base_route: entity.donnee_internet_entity.canonical
+  title: "Edit"
+
+entity.donnee_internet_entity.version_history:
+  route_name: entity.donnee_internet_entity.version_history
+  base_route: entity.donnee_internet_entity.canonical
+  title: "Revisions"
+
+entity.donnee_internet_entity.delete_form:
+  route_name: entity.donnee_internet_entity.delete_form
+  base_route: entity.donnee_internet_entity.canonical
+  title: Delete
+  weight: 10
