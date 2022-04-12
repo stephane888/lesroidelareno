@@ -4,6 +4,7 @@ namespace Drupal\lesroidelareno;
 
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\lesroidelareno\Services\FormDonneeSiteVar;
+use Stephane888\Debug\debugLog;
 use function GuzzleHttp\json_encode;
 
 class LesroidelarenoFormDonneeSite {
@@ -56,6 +57,11 @@ class LesroidelarenoFormDonneeSite {
           ]
         ]
       ],
+      'step4' => [
+        'keys' => [
+          'type_home_page'
+        ]
+      ],
       'step5' => [
         'keys' => [
           'pages'
@@ -101,7 +107,33 @@ class LesroidelarenoFormDonneeSite {
             $validStep = fasle;
             foreach ($value['keys'] as $fieldName) {
               if (!empty($dsi_form[$fieldName])) {
-                $form[$fieldName] = $dsi_form[$fieldName];
+                
+                // on reconstruit les options en function du choix du type de site.
+                if ('type_home_page' == $fieldName) {
+                  $values = $form_state->get(FormDonneeSiteVar::$fields_value);
+                  if (!empty($values['type_site0'])) {
+                    $query = \Drupal::entityQuery("site_internet_entity_type", 'sit');
+                    $query->condition("terms", [
+                      [
+                        "target_id" => "73566"
+                      ]
+                    ]);
+                    $ids = $query->execute();
+                    // $theme1 = \Drupal\creation_site_virtuel\Entity\SiteInternetEntityType::load("theme1");
+                    dump($ids);
+                    // dump($ids);
+                  }
+                  $form[$fieldName] = $dsi_form[$fieldName];
+                  // debugLog::$max_depth = 7;
+                  // $debug = [
+                  // $dsi_form[$fieldName]['widget']["#options"],
+                  // $form_state->getValue('type_site'),
+                  // $form_state->get(FormDonneeSiteVar::$fields_value)
+                  // ];
+                  // debugLog::kintDebugDrupal($debug, 'field__' . $fieldName);
+                }
+                else
+                  $form[$fieldName] = $dsi_form[$fieldName];
                 // $steps[$k][$fieldName] = [];
                 $validStep = true;
               }
@@ -148,6 +180,31 @@ class LesroidelarenoFormDonneeSite {
    * @param array $form
    */
   static function getHeader($name, array &$form) {
+    // $query = \Drupal::entityQuery("site_internet_entity_type", 'sit');
+    
+    // /**
+    // *
+    // * @var \Drupal\Core\Config\Entity\Query\Query $query
+    // */
+    // // $query->condition("terms", [
+    // // [
+    // // "target_id" => "73566"
+    // // ]
+    // // ]);
+    // // //
+    // // $query->condition("terms.target_id", [
+    // // "target_id" => "73566"
+    // // ]);
+    // $query->condition('terms', [
+    // 73566,
+    
+    // ], 'IN');
+    // $ids = $query->execute();
+    $query = \Drupal::entityTypeManager()->getStorage('site_internet_entity_type')->getQuery();
+    $query->condition('terms.*', '735660');
+    $ids = $query->execute();
+    // $theme1 = \Drupal\creation_site_virtuel\Entity\SiteInternetEntityType::load("theme1");
+    dump($ids);
     $form[$name] = [
       '#type' => 'html_tag',
       '#tag' => 'div',
@@ -179,6 +236,24 @@ class LesroidelarenoFormDonneeSite {
           ]
         ]
       ]
+    ];
+  }
+  
+  static public function getListThemeColor() {
+    return [
+      'etincelle' => 'Etincelle',
+      'chic' => 'Chic'
+    ];
+  }
+  
+  static public function getListPages() {
+    return [
+      'contact' => 'page : Contact ',
+      'service' => 'page : Service ',
+      'propos' => 'page  : à propos de nous ',
+      'personnel' => 'page : personnel ',
+      'tarif' => 'page : Nos tarifs ',
+      'qui-sommes-nous' => 'page : Qui sommes nous '
     ];
   }
   

@@ -223,14 +223,14 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
     
     // 2 On doit preciser le taxo plus tard.( ce dernier vient de module creation de site virtuel ).
     $fields['type_site'] = BaseFieldDefinition::create('entity_reference')->setLabel(" Quel type de site souhaitez-vous créer ? ")->setDisplayOptions('form', [
-      'type' => 'entity_reference_autocomplete',
+      'type' => 'options_select',
       'weight' => 5,
       'settings' => [
         'match_operator' => 'CONTAINS',
         'size' => '60',
         'placeholder' => ''
       ]
-    ])->setDisplayConfigurable('view', TRUE)->setDisplayConfigurable('form', true)->setSetting('handler_settings', [
+    ])->setDisplayConfigurable('view', TRUE)->setDisplayConfigurable('form', true)->setDescription(t(" Selectionnez un domaine lié ou proche de votre activé "))->setSetting('handler_settings', [
       'target_bundles' => [
         'typesite' => 'typesite'
       ],
@@ -243,7 +243,7 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
     ])->setSetting('target_type', 'taxonomy_term')->setSetting('handler', 'default:taxonomy_term')->setRevisionable(TRUE);
     
     // 3
-    $fields['type_color_theme'] = BaseFieldDefinition::create('boolean')->setLabel("Sélectionner les couleurs de votre site ou un theme de couleur")->setDisplayOptions('form', [
+    $fields['type_color_theme'] = BaseFieldDefinition::create('boolean')->setLabel(" Comment souhatitez vous definir les couleurs ? ")->setRequired(true)->setDisplayOptions('form', [
       'type' => 'options_buttons',
       'weight' => -3
     ])->setDisplayOptions('view', [])->setDisplayConfigurable('view', TRUE)->setDisplayConfigurable('form', true)->setSetting('on_label', "Selectionner les couleurs")->setSetting('off_label', 'Selectionner un theme de couleur');
@@ -266,7 +266,7 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
     ])->setDisplayConfigurable('form', true)->setDisplayConfigurable('view', TRUE);
     // 3.2
     $fields['site-theme-color'] = BaseFieldDefinition::create('list_string')->setLabel(" Choisisez un theme  ")->setRequired(TRUE)->setSetting('allowed_values_function', [
-      '\Drupal\lesroidelareno\lesroidelareno',
+      '\Drupal\lesroidelareno\LesroidelarenoFormDonneeSite',
       'getListThemeColor'
     ])->setDisplayOptions('view', [
       'label' => 'above'
@@ -277,10 +277,19 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
     ])->setDisplayConfigurable('form', TRUE)->setDisplayConfigurable('view', TRUE);
     
     // 4 choix du model de la page d'acceuil.
+    $fields['type_home_page'] = BaseFieldDefinition::create('entity_reference')->setLabel(t("Choisissez le design de votre page d'accueil"))->setRevisionable(TRUE)->setSetting('target_type', 'site_internet_entity_type')->setSetting('handler', 'default')->setDisplayOptions('view', [
+      'label' => 'hidden',
+      'type' => 'author',
+      'weight' => 0
+    ])->setDisplayOptions('form', [
+      'type' => 'selectfilter_theme',
+      'weight' => 5,
+      'settings' => []
+    ])->setDisplayConfigurable('form', TRUE)->setDisplayConfigurable('view', TRUE);
     
     // 5 Choix des pages que lon souhaite avoir.
     $fields['pages'] = BaseFieldDefinition::create('list_string')->setLabel(" Selectionner les pages ")->setRequired(TRUE)->setSetting('allowed_values_function', [
-      '\Drupal\lesroidelareno\lesroidelareno',
+      '\Drupal\lesroidelareno\LesroidelarenoFormDonneeSite',
       'getListPages'
     ])->setDisplayOptions('view', [
       'label' => 'above'
