@@ -8,6 +8,7 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
 use Drupal\Component\Utility\SortArray;
 use Drupal\lesroidelareno\LesroidelarenoFormDonneeSite;
 use Drupal\lesroidelareno\Services\FormDonneeSiteVar;
+use Drupal\Core\Entity\Entity\EntityFormDisplay;
 use Stephane888\Debug\debugLog;
 
 /**
@@ -40,28 +41,48 @@ class DonneeSiteInternetEntityForm extends ContentEntityForm {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
+    $formParents = [];
+    /**
+     * On verifie si l'entité existe deja.
+     */
+    if ($form_state->has(FormDonneeSiteVar::$entity)) {
+      $entity = $form_state->get(FormDonneeSiteVar::$entity);
+      /**
+       *
+       * @var EntityFormDisplay $form_display
+       */
+      $form_display = $form_state->get(FormDonneeSiteVar::$entity_display);
+      $form_display->buildForm($entity, $formParents, $form_state);
+    }
+    else {
+      $form_state->set(FormDonneeSiteVar::$entity, $this->entity);
+      $formParents = parent::buildForm($form, $form_state);
+      $form_display = EntityFormDisplay::collectRenderDisplay($this->entity, 'default');
+      $form_state->set(FormDonneeSiteVar::$entity_display, $form_display);
+    }
     // $fieldTem = $this->entity->getFieldDefinitions()['type_site'];
     // dump($fieldTem->getSetting('handler_settings'));
     /* @var \Drupal\lesroidelareno\Entity\DonneeSiteInternetEntity $entity */
+    
     /**
      * On sauvegarde les champs qui vont etre utiliser durant les etapes.
      */
-    if (!$form_state->has(FormDonneeSiteVar::$key_dsi_form)) {
-      $dsi_form = [];
-      // on retire les elements qui ne correspondent pas à un champs.
-      foreach (parent::buildForm($form, $form_state) as $key => $field) {
-        if (!empty($field['#type']) && !empty($field['widget'])) {
-          $dsi_form[$key] = $field;
-        }
+    // if (!$form_state->has(FormDonneeSiteVar::$key_dsi_form)) {
+    $dsi_form = [];
+    // on retire les elements qui ne correspondent pas à un champs.
+    foreach ($formParents as $key => $field) {
+      if (!empty($field['#type']) && !empty($field['widget'])) {
+        $dsi_form[$key] = $field;
       }
-      // On reordonne les champs par ordre de poids.
-      uasort($dsi_form, [
-        SortArray::class,
-        'sortByWeightProperty'
-      ]);
-      $form_state->set(FormDonneeSiteVar::$key_dsi_form, $dsi_form);
-      // dump($dsi_form);
     }
+    // On reordonne les champs par ordre de poids.
+    uasort($dsi_form, [
+      SortArray::class,
+      'sortByWeightProperty'
+    ]);
+    $form_state->set(FormDonneeSiteVar::$key_dsi_form, $dsi_form);
+    // dump($this->entity->get('contenus_transferer')->getSettings());
+    // }
     
     // dump($form_state->getStorage());
     $form['donnee-internet-entity'] = [
@@ -76,13 +97,32 @@ class DonneeSiteInternetEntityForm extends ContentEntityForm {
         ]
       ]
     ];
+    // $steps = $form_state->get(FormDonneeSiteVar::$key_steps);
+    // $key = null;
+    // if (is_array($steps))
+    // $key = array_key_last($steps);
+    // // dump($key);
+    // if ($key == 'step6') {
+    // $dsi_form = $form_state->get(FormDonneeSiteVar::$key_dsi_form);
+    // $fieldName = 'contenus_transferer';
+    // // $this->messenger()->addStatus(' images ' . json_encode($form_state->getValue('contenus_transferer')[0]['fids']), true);
+    // // if (!empty($dsi_form[$fieldName]['widget'][0])) {
+    // // // $dsi_form[$fieldName]['widget'][0]['#default_value']['fids'][] = $form_state->getValue('contenus_transferer')[0]['fids'][0];
+    // // }
+    
+    // // foreach ($formParents as $k => $fieldP) {
+    // // if ($k == $fieldName) {
+    // // $form['donnee-internet-entity'][$fieldName] = $fieldP;
+    // // }
+    // // }
+    // $form['donnee-internet-entity'][$fieldName] = $dsi_form[$fieldName];
+    // // dump($dsi_form);
+    // }
     if ($form_state->has(FormDonneeSiteVar::$key_steps)) {
-      // $this->messenger()->addStatus(FormDonneeSiteVar::$key_steps, true);
       LesroidelarenoFormDonneeSite::getFieldForStep($form['donnee-internet-entity'], $form_state);
     }
     else
       LesroidelarenoFormDonneeSite::getHeader('ctm_description', $form['donnee-internet-entity']);
-    
     //
     $form['donnee-internet-entity']['container_buttons'] = [
       '#type' => 'html_tag',
@@ -194,70 +234,113 @@ class DonneeSiteInternetEntityForm extends ContentEntityForm {
     return $form['donnee-internet-entity'];
   }
   
+  /**
+   *
+   * @param array $form
+   * @param FormStateInterface $form_state
+   */
   public function selectNextFieldSubmit($form, FormStateInterface $form_state) {
-    // if (!empty($form['donnee-internet-entity']['name']))
-    // $this->messenger()->addStatus('selectNextFieldSubmit :: ' . json_encode($form_state->getValue('name')), true);
-    // on determine l'etape.
+    //
     if ($form_state->has(FormDonneeSiteVar::$key_steps)) {
-      $values = $form_state->getUserInput();
-      $steps = $form_state->get(FormDonneeSiteVar::$key_steps);
-      $fieldsValue = $form_state->get(FormDonneeSiteVar::$fields_value);
-      $dsi_form = $form_state->get(FormDonneeSiteVar::$key_dsi_form);
-      $steppers = LesroidelarenoFormDonneeSite::getStepper();
-      $k_last = array_key_last($steps);
-      if (!empty($steppers[$k_last]['keys']))
-        foreach ($steppers[$k_last]['keys'] as $fieldName) {
-          if (isset($values[$fieldName])) {
-            // $this->messenger()->addStatus($fieldName . ' :: ' . json_encode($values));
-            $fieldsValue[$fieldName] = $values[$fieldName];
-            if (!empty($form['donnee-internet-entity'][$fieldName])) {
-              // dump($form['donnee-internet-entity'][$fieldName]);
-              // debugLog::$max_depth = 7;
-              // debugLog::kintDebugDrupal($form['donnee-internet-entity'][$fieldName], $fieldName, true);
-              $dsi_form[$fieldName] = $form['donnee-internet-entity'][$fieldName];
-              /**
-               * Il faut nettoyer le #value, car si cette valeur est remplie on ne pourra plus mettre à jour.
-               * De plus, on doit mettre la valeur encours dans default value, pour mettre de voir la precedente si l'utilisateur revient en arriere.
-               */
-              if (isset($dsi_form[$fieldName]['widget'][0]['value']['#value'])) {
-                $dsi_form[$fieldName]['widget'][0]['value']['#default_value'] = $dsi_form[$fieldName]['widget'][0]['value']['#value'];
-                unset($dsi_form[$fieldName]['widget'][0]['value']['#value']);
-              }
-              elseif (isset($dsi_form[$fieldName]['widget'][0]['color']['#value'])) {
-                $dsi_form[$fieldName]['widget'][0]['color']['#default_value'] = $dsi_form[$fieldName]['widget'][0]['color']['#value'];
-                unset($dsi_form[$fieldName]['widget'][0]['color']['#value']);
-              }
-              // elseif (isset($dsi_form[$fieldName]['widget'][0]['target_id']['#value'])) {
-              // $dsi_form[$fieldName]['widget'][0]['target_id']['#default_value'] = $dsi_form[$fieldName]['widget'][0]['target_id']['#value'];
-              // unset($dsi_form[$fieldName]['widget'][0]['target_id']['#value']);
-              // }
-              elseif (isset($dsi_form[$fieldName]['widget']['value']['#value'])) {
-                $dsi_form[$fieldName]['widget']['value']['#default_value'] = $dsi_form[$fieldName]['widget']['value']['#value'];
-                unset($dsi_form[$fieldName]['widget']['value']['#value']);
-              }
-              else {
-                // debugLog::$max_depth = 7;
-                // debugLog::kintDebugDrupal($form['donnee-internet-entity'][$fieldName], $fieldName, true);
-              }
-            }
-            else {
-              // dump('error :: ' . $fieldName);
-            }
-          }
+      if ($form_state->has(FormDonneeSiteVar::$entity)) {
+        $entity = $form_state->get(FormDonneeSiteVar::$entity);
+        /**
+         *
+         * @var EntityFormDisplay $form_display;
+         */
+        $form_display = $form_state->get(FormDonneeSiteVar::$entity_display);
+        /**
+         * On retire les arrays vide, cela semble etre un bug.
+         *
+         * @var array $files
+         */
+        $files = $entity->get('contenus_transferer')->getValue();
+        $new_files = [];
+        foreach ($files as $file) {
+          if (!empty($file))
+            $new_files[] = $file;
         }
-      /**
-       * Permet de mettre à jour le champs.
-       * ( Permet de concerver la valeur selectionner par l'utilisateur ).
-       */
-      $form_state->set(FormDonneeSiteVar::$key_dsi_form, $dsi_form);
-      //
-      // $form_state->set(FormDonneeSiteVar::$key_steps, $steps);
-      //
-      $form_state->set(FormDonneeSiteVar::$fields_value, $fieldsValue);
+        $entity->set('contenus_transferer', $new_files);
+        $form_display->extractFormValues($entity, $form, $form_state);
+        debugLog::kintDebugDrupal($entity->get('contenus_transferer')->getValue(), 'contenus_transferer', true);
+        $form_state->set(FormDonneeSiteVar::$entity, $entity);
+      }
     }
     else {
       $form_state->set(FormDonneeSiteVar::$key_steps, []);
     }
+    $form_state->set('step_direction', '+');
+    $form_state->setRebuild(true);
+  }
+  
+  public function selectNextFieldSubmitOld($form, FormStateInterface $form_state) {
+    // if (!empty($form['donnee-internet-entity']['name']))
+    // $this->messenger()->addStatus('selectNextFieldSubmit :: ' . json_encode($form_state->getValue('name')), true);
+    // on determine l'etape.
+    $element = $form_state->getTriggeringElement();
+    if (!empty($element['#name']) && $element['#name'] == 'op') {
+      if ($form_state->has(FormDonneeSiteVar::$key_steps)) {
+        $values = $form_state->getUserInput();
+        $steps = $form_state->get(FormDonneeSiteVar::$key_steps);
+        $fieldsValue = $form_state->get(FormDonneeSiteVar::$fields_value);
+        $dsi_form = $form_state->get(FormDonneeSiteVar::$key_dsi_form);
+        $steppers = LesroidelarenoFormDonneeSite::getStepper();
+        $k_last = array_key_last($steps);
+        if (!empty($steppers[$k_last]['keys']))
+          foreach ($steppers[$k_last]['keys'] as $fieldName) {
+            if (isset($values[$fieldName])) {
+              // $this->messenger()->addStatus($fieldName . ' :: ' . json_encode($values));
+              $fieldsValue[$fieldName] = $values[$fieldName];
+              if (!empty($form['donnee-internet-entity'][$fieldName])) {
+                // dump($form['donnee-internet-entity'][$fieldName]);
+                // debugLog::$max_depth = 7;
+                // debugLog::kintDebugDrupal($form['donnee-internet-entity'][$fieldName], $fieldName, true);
+                $dsi_form[$fieldName] = $form['donnee-internet-entity'][$fieldName];
+                /**
+                 * Il faut nettoyer le #value, car si cette valeur est remplie on ne pourra plus mettre à jour.
+                 * De plus, on doit mettre la valeur encours dans default value, pour mettre de voir la precedente si l'utilisateur revient en arriere.
+                 */
+                if (isset($dsi_form[$fieldName]['widget'][0]['value']['#value'])) {
+                  $dsi_form[$fieldName]['widget'][0]['value']['#default_value'] = $dsi_form[$fieldName]['widget'][0]['value']['#value'];
+                  unset($dsi_form[$fieldName]['widget'][0]['value']['#value']);
+                }
+                elseif (isset($dsi_form[$fieldName]['widget'][0]['color']['#value'])) {
+                  $dsi_form[$fieldName]['widget'][0]['color']['#default_value'] = $dsi_form[$fieldName]['widget'][0]['color']['#value'];
+                  unset($dsi_form[$fieldName]['widget'][0]['color']['#value']);
+                }
+                // elseif (isset($dsi_form[$fieldName]['widget'][0]['target_id']['#value'])) {
+                // $dsi_form[$fieldName]['widget'][0]['target_id']['#default_value'] = $dsi_form[$fieldName]['widget'][0]['target_id']['#value'];
+                // unset($dsi_form[$fieldName]['widget'][0]['target_id']['#value']);
+                // }
+                elseif (isset($dsi_form[$fieldName]['widget']['value']['#value'])) {
+                  $dsi_form[$fieldName]['widget']['value']['#default_value'] = $dsi_form[$fieldName]['widget']['value']['#value'];
+                  unset($dsi_form[$fieldName]['widget']['value']['#value']);
+                }
+                else {
+                  // debugLog::$max_depth = 7;
+                  // debugLog::kintDebugDrupal($form['donnee-internet-entity'][$fieldName], $fieldName, true);
+                }
+              }
+              else {
+                // dump('error :: ' . $fieldName);
+              }
+            }
+          }
+        /**
+         * Permet de mettre à jour le champs.
+         * ( Permet de concerver la valeur selectionner par l'utilisateur ).
+         */
+        $form_state->set(FormDonneeSiteVar::$key_dsi_form, $dsi_form);
+        
+        $form_state->set(FormDonneeSiteVar::$key_steps, $steps);
+        
+        $form_state->set(FormDonneeSiteVar::$fields_value, $fieldsValue);
+      }
+      else {
+        $form_state->set(FormDonneeSiteVar::$key_steps, []);
+      }
+    }
+    
     $form_state->set('step_direction', '+');
     $form_state->setRebuild(true);
   }
@@ -269,8 +352,15 @@ class DonneeSiteInternetEntityForm extends ContentEntityForm {
   }
   
   public function saveSubmit($form, FormStateInterface $form_state) {
-    $fieldsValue = $form_state->get(FormDonneeSiteVar::$fields_value);
-    dump($fieldsValue);
+    $entity = $form_state->get(FormDonneeSiteVar::$entity);
+    $entity->save();
+    $form_state->setRedirect('entity.donnee_internet_entity.canonical', [
+      'donnee_internet_entity' => $entity->id()
+    ]);
+  }
+  
+  public function file_managed_file_submit($form, FormStateInterface $form_state) {
+    // debugLog::kintDebugDrupal($form, 'file_managed_file_submit', true);
   }
   
   /**

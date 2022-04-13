@@ -10,7 +10,7 @@ namespace Drupal\lesroidelareno\Services;
 class FormDonneeSiteVar {
   
   /**
-   * Permet de sauvegarder l'etape.
+   * Permet de sauvegarder les etapes.
    * C'est un tableau avec les cles. La derniere valeur est la veleurs courantes.
    *
    * @var string
@@ -28,6 +28,7 @@ class FormDonneeSiteVar {
    * Contient les valeurs.
    *
    * @var array
+   * @deprecated Plus necesssaire.
    */
   public static $fields_value = 'fields_value';
   
@@ -37,5 +38,19 @@ class FormDonneeSiteVar {
    * @var string
    */
   public static $laststep = 'laststep';
+  
+  /**
+   * Contient l'entité MAJ progressivement.
+   *
+   * @var string
+   */
+  public static $entity = 'entity';
+  
+  /**
+   * Contient l'entité MAJ progressivement.
+   *
+   * @var string
+   */
+  public static $entity_display = 'entity_display';
   
 }

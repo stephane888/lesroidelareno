@@ -240,7 +240,7 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
       ],
       'auto_create' => false,
       'auto_create_bundle' => ''
-    ])->setSetting('target_type', 'taxonomy_term')->setSetting('handler', 'default:taxonomy_term')->setRevisionable(TRUE);
+    ])->setSetting('target_type', 'taxonomy_term')->setSetting('handler', 'default')->setRevisionable(TRUE);
     
     // 3
     $fields['type_color_theme'] = BaseFieldDefinition::create('boolean')->setLabel(" Comment souhatitez vous definir les couleurs ? ")->setRequired(true)->setDisplayOptions('form', [
@@ -277,7 +277,7 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
     ])->setDisplayConfigurable('form', TRUE)->setDisplayConfigurable('view', TRUE);
     
     // 4 choix du model de la page d'acceuil.
-    $fields['type_home_page'] = BaseFieldDefinition::create('entity_reference')->setLabel(t("Choisissez le design de votre page d'accueil"))->setRevisionable(TRUE)->setSetting('target_type', 'site_internet_entity_type')->setSetting('handler', 'default')->setDisplayOptions('view', [
+    $fields['type_home_page'] = BaseFieldDefinition::create('entity_reference')->setLabel(t("Choisissez le design de votre page d'accueil"))->setRevisionable(TRUE)->setSetting('target_type', 'site_type_datas')->setSetting('handler', 'default')->setDisplayOptions('view', [
       'label' => 'hidden',
       'type' => 'author',
       'weight' => 0
@@ -285,7 +285,7 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
       'type' => 'selectfilter_theme',
       'weight' => 5,
       'settings' => []
-    ])->setDisplayConfigurable('form', TRUE)->setDisplayConfigurable('view', TRUE);
+    ])->setDisplayConfigurable('form', TRUE)->setDisplayConfigurable('view', TRUE)->setDescription(t("Les couleurs de theme seront mise à jour lors de la creation de votre model, vous pourriez toujours les modifier."));
     
     // 5 Choix des pages que lon souhaite avoir.
     $fields['pages'] = BaseFieldDefinition::create('list_string')->setLabel(" Selectionner les pages ")->setRequired(TRUE)->setSetting('allowed_values_function', [
@@ -294,16 +294,58 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
     ])->setDisplayOptions('view', [
       'label' => 'above'
     ])->setDisplayOptions('form', [
-      'type' => 'options_select',
+      'type' => 'options_buttons',
       'settings' => [],
       'weight' => -3
-    ])->setDisplayConfigurable('form', TRUE)->setDisplayConfigurable('view', TRUE);
+    ])->setDisplayConfigurable('form', TRUE)->setDisplayConfigurable('view', TRUE)->setCardinality(-1);
     
     // 6 Avez vous du contenus.
-    
     $fields['status']->setDescription(t('A boolean indicating whether the Donnee site internet des utilisateurs is published.'))->setDisplayOptions('form', [
       'type' => 'boolean_checkbox',
       'weight' => -3
+    ]);
+    
+    // 7
+    // $fields['has_contents'] = BaseFieldDefinition::create('boolean')->setLabel(" Avez vous du contenu pour vos différentes pages ? ")->setRequired(true)->setDisplayOptions('form', [
+    // 'type' => 'options_buttons',
+    // 'weight' => -3
+    // ])->setDisplayOptions('view', [])->setDisplayConfigurable('view', TRUE)->setDisplayConfigurable('form', true)->setSetting('on_label', "Oui")->setSetting('off_label', 'Non')->setDescription(t("
+    // Si vous n'avez pas de contenu, nous pouvons vous accompagnez dans sa redaction. "));
+    
+    // 7.1 => l'utilisateur a du contenu.
+    $fields['contenus_transferer'] = BaseFieldDefinition::create('file')->setLabel(' Ajouter vos contenus ( textes, images, videos ... ) ')->setDisplayConfigurable('form', true)->setDisplayConfigurable('view', TRUE)->setRequired(false)->setSettings([
+      'target_type' => 'file',
+      'display_field' => false,
+      'display_default' => false,
+      'uri_scheme' => 'public', // private
+      'file_extensions' => 'doc docx pdf zip jpg png git tar gz rtf',
+      'file_directory' => "[date:custom:Y]-[date:custom:m]",
+      'max_filesize' => "",
+      'description_field' => "",
+      'handler' => 'default',
+      'handler_settings' => []
+    ])->setDescription(" Vous pouvez zipper vos contenus afin de les transferer plus rapidement ")->setSetting('default_image', [
+      'target_id' => 1406,
+      'uuid' => '21da205e-97b5-4817-b746-4da3d6a53813',
+      'width' => 100,
+      'height' => 100,
+      'alt' => '',
+      'title' => ''
+    ])->setCardinality(-1);
+    
+    // 8
+    $fields['demande_traitement'] = BaseFieldDefinition::create('boolean')->setLabel(" Vos données sont t'elle complete ? ")->setRequired(true)->setDisplayOptions('form', [
+      'type' => 'options_buttons',
+      'weight' => -3
+    ])->setDisplayOptions('view', [])->setDisplayConfigurable('view', TRUE)->setDisplayConfigurable('form', true)->setSetting('on_label', "Oui")->setSetting('off_label', 'Non ')->setDescription(t("NB: nous debuterons la construction  de votre site si vous avez selectionné 'oui'. "));
+    
+    // 9
+    $fields['traitement_encours'] = BaseFieldDefinition::create('list_string')->setLabel(" Construction encours ... ")->setRequired(true)->setDisplayOptions('form', [
+      'type' => 'options_buttons',
+      'weight' => -3
+    ])->setSetting('allowed_values_function', [
+      '\Drupal\lesroidelareno\LesroidelarenoFormDonneeSite',
+      'StatusTraitement'
     ]);
     
     $fields['created'] = BaseFieldDefinition::create('created')->setLabel(t('Created'))->setDescription(t('The time that the entity was created.'));
