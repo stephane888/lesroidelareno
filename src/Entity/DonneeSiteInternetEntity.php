@@ -348,9 +348,9 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
       'StatusTraitement'
     ]);
     
-    $fields['created'] = BaseFieldDefinition::create('created')->setLabel(t('Created'))->setDescription(t('The time that the entity was created.'));
+    $fields['created'] = BaseFieldDefinition::create('created')->setLabel(t('Created'))->setDescription(t(' The time that the entity was created. '));
     
-    $fields['changed'] = BaseFieldDefinition::create('changed')->setLabel(t('Changed'))->setDescription(t('The time that the entity was last edited.'));
+    $fields['changed'] = BaseFieldDefinition::create('changed')->setLabel(t('Changed'))->setDescription(t(' The time that the entity was last edited. '));
     
     return $fields;
   }

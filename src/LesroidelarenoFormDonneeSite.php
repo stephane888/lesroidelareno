@@ -84,6 +84,11 @@ class LesroidelarenoFormDonneeSite {
     ];
   }
   
+  /**
+   *
+   * @param array $form
+   * @param FormStateInterface $form_state
+   */
   static function getFieldForStep(array &$form, FormStateInterface $form_state) {
     $dsi_form = $form_state->get(FormDonneeSiteVar::$key_dsi_form);
     $element = $form_state->getTriggeringElement();
@@ -124,7 +129,7 @@ class LesroidelarenoFormDonneeSite {
               if (!$valid)
                 continue;
             }
-            // \Drupal::messenger()->addStatus($k, true);
+            // \Drupal::messenger()->addStatus($k . ' value :: ' . json_encode($validStep), true);
             $validStep = fasle;
             foreach ($value['keys'] as $fieldName) {
               if (!empty($dsi_form[$fieldName])) {
@@ -156,17 +161,10 @@ class LesroidelarenoFormDonneeSite {
                     $dsi_form[$fieldName]['widget']['#options'] = $options;
                   }
                   $form[$fieldName] = $dsi_form[$fieldName];
-                  // debugLog::$max_depth = 7;
-                  // $debug = [
-                  // $dsi_form[$fieldName]['widget']["#options"],
-                  // $form_state->getValue('type_site'),
-                  // $form_state->get(FormDonneeSiteVar::$fields_value)
-                  // ];
-                  // debugLog::kintDebugDrupal($debug, 'field__' . $fieldName);
                 }
-                else
+                else {
                   $form[$fieldName] = $dsi_form[$fieldName];
-                // $steps[$k][$fieldName] = [];
+                }
                 $validStep = true;
               }
             }
@@ -212,13 +210,14 @@ class LesroidelarenoFormDonneeSite {
        *
        * @var string $key
        */
-      $key = array_key_last($steps);
-      $steppers = self::getStepper();
-      if (!empty($steppers[$key])) {
-        foreach ($steppers[$key]['keys'] as $fieldName) {
-          $form[$fieldName] = $dsi_form[$fieldName];
+      if (!empty($steps)) {
+        $key = array_key_last($steps);
+        $steppers = self::getStepper();
+        if (!empty($steppers[$key])) {
+          foreach ($steppers[$key]['keys'] as $fieldName) {
+            $form[$fieldName] = $dsi_form[$fieldName];
+          }
         }
-        // debugLog::kintDebugDrupal($dsi_form, 'getTriggeringElement_form', true);
       }
     }
   }

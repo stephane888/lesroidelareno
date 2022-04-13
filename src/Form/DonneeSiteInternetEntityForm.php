@@ -123,6 +123,10 @@ class DonneeSiteInternetEntityForm extends ContentEntityForm {
     }
     else
       LesroidelarenoFormDonneeSite::getHeader('ctm_description', $form['donnee-internet-entity']);
+    
+    if ($form_state->get(FormDonneeSiteVar::$laststep)) {
+      LesroidelarenoFormDonneeSite::getFooter($form['donnee-internet-entity'], $form_state);
+    }
     //
     $form['donnee-internet-entity']['container_buttons'] = [
       '#type' => 'html_tag',
@@ -137,7 +141,7 @@ class DonneeSiteInternetEntityForm extends ContentEntityForm {
       ],
       '#weight' => 45
     ];
-    
+    //
     if ($form_state->has(FormDonneeSiteVar::$key_steps) && count($form_state->get(FormDonneeSiteVar::$key_steps)) > 1) {
       $form['donnee-internet-entity']['container_buttons']['previews'] = [
         '#type' => 'submit',
@@ -354,14 +358,12 @@ class DonneeSiteInternetEntityForm extends ContentEntityForm {
   public function saveSubmit($form, FormStateInterface $form_state) {
     $entity = $form_state->get(FormDonneeSiteVar::$entity);
     $entity->save();
-    $form_state->setRedirect('entity.donnee_internet_entity.canonical', [
-      'donnee_internet_entity' => $entity->id()
-    ]);
+    $form_state->setRedirect('user.page', []);
   }
   
-  public function file_managed_file_submit($form, FormStateInterface $form_state) {
-    // debugLog::kintDebugDrupal($form, 'file_managed_file_submit', true);
-  }
+  // public function file_managed_file_submit($form, FormStateInterface $form_state) {
+  // // debugLog::kintDebugDrupal($form, 'file_managed_file_submit', true);
+  // }
   
   /**
    * La validation se ferra à la fin.
