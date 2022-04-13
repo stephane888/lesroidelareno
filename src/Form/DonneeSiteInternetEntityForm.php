@@ -9,7 +9,6 @@ use Drupal\Component\Utility\SortArray;
 use Drupal\lesroidelareno\LesroidelarenoFormDonneeSite;
 use Drupal\lesroidelareno\Services\FormDonneeSiteVar;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
-use Stephane888\Debug\debugLog;
 
 /**
  * Form controller for Donnee site internet des utilisateurs edit forms.
@@ -266,7 +265,6 @@ class DonneeSiteInternetEntityForm extends ContentEntityForm {
         }
         $entity->set('contenus_transferer', $new_files);
         $form_display->extractFormValues($entity, $form, $form_state);
-        debugLog::kintDebugDrupal($entity->get('contenus_transferer')->getValue(), 'contenus_transferer', true);
         $form_state->set(FormDonneeSiteVar::$entity, $entity);
       }
     }

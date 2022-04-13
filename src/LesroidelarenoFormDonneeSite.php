@@ -5,8 +5,6 @@ namespace Drupal\lesroidelareno;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\lesroidelareno\Services\FormDonneeSiteVar;
 use Drupal\creation_site_virtuel\Entity\SiteTypeDatas;
-use Stephane888\Debug\debugLog;
-use Drupal\Core\Entity\EntityViewBuilder;
 use Drupal\lesroidelareno\Entity\DonneeSiteInternetEntity;
 use function GuzzleHttp\json_encode;
 
