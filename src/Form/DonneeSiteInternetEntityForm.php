@@ -124,7 +124,7 @@ class DonneeSiteInternetEntityForm extends ContentEntityForm {
       LesroidelarenoFormDonneeSite::getHeader('ctm_description', $form['donnee-internet-entity']);
     
     if ($form_state->get(FormDonneeSiteVar::$laststep)) {
-      LesroidelarenoFormDonneeSite::getFooter($form['donnee-internet-entity'], $form_state);
+      LesroidelarenoFormDonneeSite::getFooter('ctm_footer', $form['donnee-internet-entity']);
     }
     //
     $form['donnee-internet-entity']['container_buttons'] = [
