@@ -9,6 +9,9 @@ use Drupal\Component\Utility\SortArray;
 use Drupal\lesroidelareno\LesroidelarenoFormDonneeSite;
 use Drupal\lesroidelareno\Services\FormDonneeSiteVar;
 use Drupal\Core\Entity\Entity\EntityFormDisplay;
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\RedirectCommand;
+use Drupal\Core\Url;
 
 /**
  * Form controller for Donnee site internet des utilisateurs edit forms.
@@ -119,6 +122,39 @@ class DonneeSiteInternetEntityForm extends ContentEntityForm {
     // }
     if ($form_state->has(FormDonneeSiteVar::$key_steps)) {
       LesroidelarenoFormDonneeSite::getFieldForStep($form['donnee-internet-entity'], $form_state);
+      
+      $form['donnee-internet-entity']['#attached']['library'][] = 'login_rx_vuejs/login_register_small';
+      if (array_key_last($form_state->get(FormDonneeSiteVar::$key_steps)) == 'login') {
+        $form['donnee-internet-entity'] = [
+          '#type' => 'html_tag',
+          '#tag' => 'div',
+          '#attributes' => [
+            'class' => [
+              'step-donneesite--header',
+              'with-tablet',
+              'mx-auto',
+              'text-center'
+            ]
+          ],
+          [
+            '#type' => 'html_tag',
+            '#tag' => 'h2',
+            '#value' => 'Veillez vous connectez afin de sauvegarder vos données',
+            '#attributes' => [
+              'class' => [
+                'step-donneesite--title'
+              ]
+            ]
+          ],
+          [
+            '#type' => 'html_tag',
+            '#tag' => 'div',
+            '#attributes' => [
+              'id' => 'appLoginRegister'
+            ]
+          ]
+        ];
+      }
     }
     else
       LesroidelarenoFormDonneeSite::getHeader('ctm_description', $form['donnee-internet-entity']);
@@ -356,7 +392,27 @@ class DonneeSiteInternetEntityForm extends ContentEntityForm {
   public function saveSubmit($form, FormStateInterface $form_state) {
     $entity = $form_state->get(FormDonneeSiteVar::$entity);
     $entity->save();
-    $form_state->setRedirect('user.page', []);
+    
+    $form_state->set(FormDonneeSiteVar::$entity, $entity);
+    $this->messenger()->addStatus('Vos données ont été sauvegardées');
+    // $form_state->setRebuild(true);
+    $response = new AjaxResponse();
+    if ($form_state->hasAnyErrors()) {
+      // Do validation stuff here
+      // ex: $response->addCommand(new ReplaceCommand... on error fields
+    }
+    else {
+      // Do submit stuff here
+      $this->messenger()->addStatus('rediction encours ... current');
+      // $url = Url::fromRoute('multi_sitemap.render6');
+      // $command = new RedirectCommand($url->toString());
+      // $response->addCommand($command);
+      
+      $response = new AjaxResponse();
+      $currentURL = Url::fromRoute('<current>');
+      $response->addCommand(new RedirectCommand($currentURL->toString()));
+      return $response;
+    }
   }
   
   // public function file_managed_file_submit($form, FormStateInterface $form_state) {

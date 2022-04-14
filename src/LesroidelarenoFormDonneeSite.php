@@ -29,7 +29,7 @@ class LesroidelarenoFormDonneeSite {
       ],
       'step3.1' => [
         'keys' => [
-          'site-theme-color'
+          'site_theme_color'
         ],
         "states" => [
           [
@@ -43,9 +43,9 @@ class LesroidelarenoFormDonneeSite {
       ],
       'step3.2' => [
         'keys' => [
-          'color-primary',
-          'color-link-hover',
-          'color-secondary',
+          'color_primary',
+          'color_secondary',
+          'color_linkhover',
           'background'
         ],
         "states" => [
@@ -78,6 +78,7 @@ class LesroidelarenoFormDonneeSite {
           'demande_traitement'
         ]
       ],
+      'login' => [],
       'laststep' => []
     ];
   }
@@ -105,6 +106,15 @@ class LesroidelarenoFormDonneeSite {
         // $values = $form_state->get(FormDonneeSiteVar::$fields_value);
         // $i = 0;
         foreach ($steppers as $k => $value) {
+          if ($k == 'login') {
+            if (\Drupal::currentUser()->id()) {
+              continue;
+            }
+            else {
+              $steps[$k] = [];
+              break;
+            }
+          }
           if ($k == 'laststep') {
             $form_state->set(FormDonneeSiteVar::$laststep, true);
             $steps[$k] = [];

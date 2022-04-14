@@ -1,0 +1,6 @@
+donnee_internet_entity.add:
+  path: '/donnee-site/user/donnee_internet_entity/add'
+  defaults:
+    _entity_form: 'donnee_internet_entity.default'
+  requirements:
+    _permission: 'access content'
