@@ -39,6 +39,9 @@ function lesroidelareno_preprocess_html(&$vars) {
       'meta-description'
     ];
   }
+  else {
+    $vars['page']['#attached']['library'][] = 'login_rx_vuejs/vuejs_dev';
+  }
 }
 
 function lesroidelareno_preprocess_facets_result_item__checkbox(&$vars) {

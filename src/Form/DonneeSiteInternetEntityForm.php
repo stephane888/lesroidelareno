@@ -43,6 +43,8 @@ class DonneeSiteInternetEntityForm extends ContentEntityForm {
    * {@inheritdoc}
    */
   public function buildForm(array $form, FormStateInterface $form_state) {
+    // vuejs_dev
+    // $form['#attached']['library'][] = 'login_rx_vuejs/vuejs_dev';
     $formParents = [];
     /**
      * On verifie si l'entité existe deja.
@@ -97,35 +99,15 @@ class DonneeSiteInternetEntityForm extends ContentEntityForm {
           'mx-auto',
           'text-center'
         ]
-      ]
+      ],
+      '#weight' => -10
     ];
-    // $steps = $form_state->get(FormDonneeSiteVar::$key_steps);
-    // $key = null;
-    // if (is_array($steps))
-    // $key = array_key_last($steps);
-    // // dump($key);
-    // if ($key == 'step6') {
-    // $dsi_form = $form_state->get(FormDonneeSiteVar::$key_dsi_form);
-    // $fieldName = 'contenus_transferer';
-    // // $this->messenger()->addStatus(' images ' . json_encode($form_state->getValue('contenus_transferer')[0]['fids']), true);
-    // // if (!empty($dsi_form[$fieldName]['widget'][0])) {
-    // // // $dsi_form[$fieldName]['widget'][0]['#default_value']['fids'][] = $form_state->getValue('contenus_transferer')[0]['fids'][0];
-    // // }
     
-    // // foreach ($formParents as $k => $fieldP) {
-    // // if ($k == $fieldName) {
-    // // $form['donnee-internet-entity'][$fieldName] = $fieldP;
-    // // }
-    // // }
-    // $form['donnee-internet-entity'][$fieldName] = $dsi_form[$fieldName];
-    // // dump($dsi_form);
-    // }
+    //
     if ($form_state->has(FormDonneeSiteVar::$key_steps)) {
       LesroidelarenoFormDonneeSite::getFieldForStep($form['donnee-internet-entity'], $form_state);
-      
-      $form['donnee-internet-entity']['#attached']['library'][] = 'login_rx_vuejs/login_register_small';
       if (array_key_last($form_state->get(FormDonneeSiteVar::$key_steps)) == 'login') {
-        $form['donnee-internet-entity'] = [
+        $form['donnee-internet-entity'][] = [
           '#type' => 'html_tag',
           '#tag' => 'div',
           '#attributes' => [
@@ -151,9 +133,14 @@ class DonneeSiteInternetEntityForm extends ContentEntityForm {
             '#tag' => 'div',
             '#attributes' => [
               'id' => 'appLoginRegister'
-            ]
+            ],
+            '#value' => 'ff',
+            '#weight' => 10
           ]
         ];
+        // $form['donnee-internet-entity']['#attached']['library'][] = 'login_rx_vuejs/login_register';
+        // $form['donnee-internet-entity']['#attached']['library'][] = 'login_rx_vuejs/login_register_small_components';
+        $form['donnee-internet-entity']['#attached']['library'][] = "lesroidelareno/lesroidelareno_login";
       }
     }
     else
@@ -162,6 +149,7 @@ class DonneeSiteInternetEntityForm extends ContentEntityForm {
     if ($form_state->get(FormDonneeSiteVar::$laststep)) {
       LesroidelarenoFormDonneeSite::getFooter('ctm_footer', $form['donnee-internet-entity']);
     }
+    
     //
     $form['donnee-internet-entity']['container_buttons'] = [
       '#type' => 'html_tag',

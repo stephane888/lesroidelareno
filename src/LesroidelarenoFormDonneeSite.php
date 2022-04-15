@@ -83,19 +83,95 @@ class LesroidelarenoFormDonneeSite {
     ];
   }
   
+  static function getStepper2() {
+    return [
+      'step1' => [
+        'keys' => [
+          'name'
+        ]
+      ],
+      // 'step2' => [
+      // 'keys' => [
+      // 'type_site'
+      // ]
+      // ],
+      'step3' => [
+        'keys' => [
+          'type_color_theme'
+        ]
+      ],
+      'step3.1' => [
+        'keys' => [
+          'site_theme_color'
+        ],
+        "states" => [
+          [
+            "action" => "visible",
+            "name" => "type_color_theme",
+            "operator" => "==",
+            "value" => "0",
+            "state_name" => ""
+          ]
+        ]
+      ],
+      'step3.2' => [
+        'keys' => [
+          'color_primary',
+          'color_secondary',
+          'color_linkhover',
+          'background'
+        ],
+        "states" => [
+          [
+            "action" => "visible",
+            "name" => "type_color_theme",
+            "operator" => "==",
+            "value" => "1",
+            "state_name" => ""
+          ]
+        ]
+      ],
+      // 'step4' => [
+      // 'keys' => [
+      // 'type_home_page'
+      // ]
+      // ],
+      'step5' => [
+        'keys' => [
+          'pages'
+        ]
+      ],
+      'step6' => [
+        'keys' => [
+          'contenus_transferer'
+        ]
+      ],
+      'step7' => [
+        'keys' => [
+          'demande_traitement'
+        ]
+      ],
+      'login' => [],
+      'laststep' => []
+    ];
+  }
+  
   /**
    *
    * @param array $form
    * @param FormStateInterface $form_state
    */
-  static function getFieldForStep(array &$form, FormStateInterface $form_state) {
+  static function getFieldForStep(array &$form, FormStateInterface $form_state, $model = 1) {
     $dsi_form = $form_state->get(FormDonneeSiteVar::$key_dsi_form);
     $element = $form_state->getTriggeringElement();
     // debugLog::kintDebugDrupal($element, 'getTriggeringElement', true);
     // on determine l'etape suivante si l'origin est le bouton next ou suivant.
     if ($form_state->has(FormDonneeSiteVar::$key_steps) && !empty($element['#name']) && $element['#name'] == 'op') {
       $steps = $form_state->get(FormDonneeSiteVar::$key_steps);
-      $steppers = self::getStepper();
+      if ($model == 1)
+        $steppers = self::getStepper();
+      else
+        $steppers = self::getStepper2();
       /**
        *
        * @var DonneeSiteInternetEntity $entity
@@ -138,7 +214,7 @@ class LesroidelarenoFormDonneeSite {
                 continue;
             }
             // \Drupal::messenger()->addStatus($k . ' value :: ' . json_encode($validStep), true);
-            $validStep = fasle;
+            $validStep = false;
             foreach ($value['keys'] as $fieldName) {
               if (!empty($dsi_form[$fieldName])) {
                 // On reconstruit les options en function du choix du type de site.
