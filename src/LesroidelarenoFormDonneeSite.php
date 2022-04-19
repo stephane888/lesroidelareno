@@ -143,9 +143,12 @@ class LesroidelarenoFormDonneeSite {
       ],
       'step6' => [
         'keys' => [
+          'image_logo',
+          'description',
           'contenus_transferer'
         ]
       ],
+      
       'step7' => [
         'keys' => [
           'demande_traitement'
