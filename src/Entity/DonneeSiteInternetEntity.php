@@ -184,6 +184,10 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
     return $this;
   }
   
+  public function setTypeHomePage($target_id) {
+    $this->set('type_home_page', $target_id);
+  }
+  
   /**
    *
    * {@inheritdoc}
@@ -245,7 +249,8 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
     // 3
     $fields['type_color_theme'] = BaseFieldDefinition::create('boolean')->setLabel(" Comment souhatitez vous definir les couleurs ? ")->setRequired(true)->setDisplayOptions('form', [
       'type' => 'options_buttons',
-      'weight' => -3
+      'weight' => -3,
+      'settings' => []
     ])->setDisplayOptions('view', [])->setDisplayConfigurable('view', TRUE)->setDisplayConfigurable('form', true)->setSetting('on_label', "Selectionner les couleurs")->setSetting('off_label', 'Selectionner un theme de couleur');
     
     // 3.1
@@ -263,7 +268,7 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
     ])->setDisplayOptions('view', [
       'label' => 'above'
     ])->setDisplayOptions('form', [
-      'type' => 'options_select',
+      'type' => 'options_buttons',
       'settings' => [],
       'weight' => -3
     ])->setDisplayConfigurable('form', TRUE)->setDisplayConfigurable('view', TRUE);
@@ -277,7 +282,7 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
       'type' => 'selectfilter_theme',
       'weight' => 5,
       'settings' => []
-    ])->setDisplayConfigurable('form', TRUE)->setDisplayConfigurable('view', TRUE)->setDescription(t("Les couleurs de theme seront mise à jour lors de la creation de votre model, vous pourriez toujours les modifier."));
+    ])->setDisplayConfigurable('form', TRUE)->setDisplayConfigurable('view', TRUE)->setDescription(t(" Les couleurs de theme seront mise à jour lors de la creation de votre model, vous pourriez toujours les modifier. "));
     
     // 5 Choix des pages que lon souhaite avoir.
     $fields['pages'] = BaseFieldDefinition::create('list_string')->setLabel(" Selectionner les pages ")->setRequired(TRUE)->setSetting('allowed_values_function', [
@@ -292,7 +297,7 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
     ])->setDisplayConfigurable('form', TRUE)->setDisplayConfigurable('view', TRUE)->setCardinality(-1);
     
     // 6 Avez vous du contenus.
-    $fields['status']->setDescription(t('A boolean indicating whether the Donnee site internet des utilisateurs is published.'))->setDisplayOptions('form', [
+    $fields['status']->setDescription(t(" A boolean indicating whether the Donnee site internet des utilisateurs is published. "))->setDisplayOptions('form', [
       'type' => 'boolean_checkbox',
       'weight' => -3
     ]);
@@ -305,6 +310,22 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
     // Si vous n'avez pas de contenu, nous pouvons vous accompagnez dans sa redaction. "));
     
     // 7.1 => l'utilisateur a du contenu.
+    $fields['image_logo'] = BaseFieldDefinition::create('image')->setLabel(' Votre logo ')->setRequired(false)->setDisplayConfigurable('form', [
+      'type' => 'image'
+    ])->setDisplayConfigurable('view', TRUE)->setSetting("min_resolution", "250x250");
+    //
+    $fields['description'] = BaseFieldDefinition::create('text_long')->setLabel(" Description ")->setSettings([
+      'text_processing' => 0,
+      'html_format' => "text_code"
+    ])->setRequired(TRUE)->setDisplayConfigurable('form', true)->setDisplayConfigurable('view', TRUE)->setDisplayOptions('form', [
+      'type' => 'text_textarea',
+      'weight' => 0
+    ])->setDisplayOptions('view', [
+      'label' => 'hidden',
+      'type' => 'text_default',
+      'weight' => 0
+    ]);
+    //
     $fields['contenus_transferer'] = BaseFieldDefinition::create('file')->setLabel(' Ajouter vos contenus ( textes, images, videos ... ) ')->setDisplayConfigurable('form', true)->setDisplayConfigurable('view', TRUE)->setRequired(false)->setSettings([
       'target_type' => 'file',
       'display_field' => false,

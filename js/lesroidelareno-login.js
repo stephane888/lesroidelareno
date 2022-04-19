@@ -15,3 +15,13 @@ setTimeout(() => {
       new Date().getTime()
   );
 }, 1000);
+// listerner if user is login
+document.addEventListener(
+  "login_rx_vuejs__user_is_login",
+  () => {
+    console.log(" Utilisateur connecter ");
+    // document.querySelector("[data-trigger=run]").click();
+    window.location.reload();
+  },
+  false
+);
