@@ -288,10 +288,10 @@ class LesroidelarenoFormDonneeSite {
                   if (!empty($dsi_form[$fieldName]['widget']['#options'])) {
                     foreach ($dsi_form[$fieldName]['widget']['#options'] as $key => $value) {
                       if ($key == 0) {
-                        $file = \Drupal\file\Entity\File::load(1576);
+                        $file = \Drupal\file\Entity\File::load(1580);
                       }
                       else {
-                        $file = \Drupal\file\Entity\File::load(1577);
+                        $file = \Drupal\file\Entity\File::load(1581);
                       }
                       
                       $dsi_form[$fieldName]['widget']['#options'][$key] = [
@@ -511,32 +511,32 @@ class LesroidelarenoFormDonneeSite {
       'audacieux' => [
         'titre' => 'Audacieux',
         'description' => 'Un esprist aventurier, fort et fier',
-        'image' => 1578
+        'image' => 1582
       ],
       'black' => [
         'titre' => 'Jet black',
         'description' => 'Un ton sérieux et saisissant, avec une touche de résilience ',
-        'image' => 1579
+        'image' => 1583
       ],
       'etincele' => [
         'titre' => 'Etincelant',
         'description' => "Vif et inspiré avec une lueur d'enthousiasme",
-        'image' => 1580
+        'image' => 1584
       ],
       'precieux' => [
         'titre' => 'Précieux',
         'description' => "Doux et câlin, comme un délicat mélange de joies",
-        'image' => 1581
+        'image' => 1585
       ],
       'retro' => [
         'titre' => 'Retro',
         'description' => "Une impression vintage, telle une antiquité qui a été restaurée",
-        'image' => 1582
+        'image' => 1586
       ],
       'inspire' => [
         'titre' => 'Nature',
         'description' => "Influent et stimulant, avec un charisme accueillant",
-        'image' => 1578
+        'image' => 1588
       ]
     ];
   }
