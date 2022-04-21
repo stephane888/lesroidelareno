@@ -254,13 +254,25 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
     ])->setDisplayOptions('view', [])->setDisplayConfigurable('view', TRUE)->setDisplayConfigurable('form', true)->setSetting('on_label', "Selectionner les couleurs")->setSetting('off_label', 'Selectionner un theme de couleur');
     
     // 3.1
-    $fields['color_primary'] = BaseFieldDefinition::create('color_theme_field_type')->setLabel(' Couleur primaire ')->setRequired(TRUE)->setDisplayConfigurable('form', true)->setDisplayConfigurable('view', TRUE);
+    $fields['color_primary'] = BaseFieldDefinition::create('color_theme_field_type')->setLabel(' Couleur primaire ')->setRequired(TRUE)->setDefaultValue([
+      'color' => '#CE3B3B',
+      'name' => ''
+    ])->setDisplayConfigurable('form', true)->setDisplayConfigurable('view', TRUE);
     //
-    $fields['color_secondary'] = BaseFieldDefinition::create('color_theme_field_type')->setLabel(' Couleur secondaire ')->setRequired(TRUE)->setDisplayConfigurable('form', true)->setDisplayConfigurable('view', TRUE);
+    $fields['color_secondary'] = BaseFieldDefinition::create('color_theme_field_type')->setLabel(' Couleur secondaire ')->setRequired(TRUE)->setDefaultValue([
+      'color' => '#DD731D',
+      'name' => ''
+    ])->setDisplayConfigurable('form', true)->setDisplayConfigurable('view', TRUE);
     //
-    $fields['color_linkhover'] = BaseFieldDefinition::create('color_theme_field_type')->setLabel(' Couleur des liens ')->setRequired(TRUE)->setDisplayConfigurable('form', true)->setDisplayConfigurable('view', TRUE);
+    $fields['color_linkhover'] = BaseFieldDefinition::create('color_theme_field_type')->setLabel(' Couleur des liens ')->setRequired(TRUE)->setDefaultValue([
+      'color' => '#F88C12',
+      'name' => ''
+    ])->setDisplayConfigurable('form', true)->setDisplayConfigurable('view', TRUE);
     //
-    $fields['background'] = BaseFieldDefinition::create('color_theme_field_type')->setLabel(" Couleur d'arrière plan ")->setRequired(TRUE)->setDisplayConfigurable('form', true)->setDisplayConfigurable('view', TRUE);
+    $fields['background'] = BaseFieldDefinition::create('color_theme_field_type')->setLabel(" Couleur d'arrière plan ")->setRequired(TRUE)->setDefaultValue([
+      'color' => '#0F103E',
+      'name' => ''
+    ])->setDisplayConfigurable('form', true)->setDisplayConfigurable('view', TRUE);
     // 3.2
     $fields['site_theme_color'] = BaseFieldDefinition::create('list_string')->setLabel(" Choisisez un theme de couleur  ")->setRequired(TRUE)->setSetting('allowed_values_function', [
       '\Drupal\lesroidelareno\LesroidelarenoFormDonneeSite',
