@@ -315,8 +315,8 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
     ])->setDisplayConfigurable('view', TRUE)->setSetting("min_resolution", "250x250");
     //
     $fields['description'] = BaseFieldDefinition::create('text_long')->setLabel(" Description ")->setSettings([
-      'text_processing' => 0,
-      'html_format' => "text_code"
+      'text_processing' => 0
+      // 'html_format' => "text_code"
     ])->setRequired(TRUE)->setDisplayConfigurable('form', true)->setDisplayConfigurable('view', TRUE)->setDisplayOptions('form', [
       'type' => 'text_textarea',
       'weight' => 0
@@ -325,8 +325,30 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
       'type' => 'text_default',
       'weight' => 0
     ]);
+    
     //
-    $fields['contenus_transferer'] = BaseFieldDefinition::create('file')->setLabel(' Ajouter vos contenus ( textes, images, videos ... ) ')->setDisplayConfigurable('form', true)->setDisplayConfigurable('view', TRUE)->setRequired(false)->setSettings([
+    $fields['contenus_transferer'] = BaseFieldDefinition::create('file')->setLabel(' Ajouter des images ')->setDisplayConfigurable('form', true)->setDisplayConfigurable('view', TRUE)->setRequired(false)->setSettings([
+      'target_type' => 'file',
+      'display_field' => false,
+      'display_default' => false,
+      'uri_scheme' => 'public', // private
+      'file_extensions' => 'doc docx pdf zip jpg png git tar gz rtf',
+      'file_directory' => "[date:custom:Y]-[date:custom:m]",
+      'max_filesize' => "",
+      'description_field' => "",
+      'handler' => 'default',
+      'handler_settings' => []
+    ])->setDescription(" Vous pouvez zipper vos contenus afin de les transferer plus rapidement ")->setSetting('default_image', [
+      'target_id' => 1406,
+      'uuid' => '21da205e-97b5-4817-b746-4da3d6a53813',
+      'width' => 100,
+      'height' => 100,
+      'alt' => '',
+      'title' => ''
+    ])->setCardinality(-1);
+    
+    //
+    $fields['contenus_transferer_txt'] = BaseFieldDefinition::create('file')->setLabel(' Ajouter des textes ')->setDisplayConfigurable('form', true)->setDisplayConfigurable('view', TRUE)->setRequired(false)->setSettings([
       'target_type' => 'file',
       'display_field' => false,
       'display_default' => false,

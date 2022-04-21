@@ -95,12 +95,12 @@ class LesroidelarenoFormDonneeSite {
       // 'type_site'
       // ]
       // ],
-      'step3' => [
+      'step2' => [
         'keys' => [
           'type_color_theme'
         ]
       ],
-      'step3.1' => [
+      'step2.1' => [
         'keys' => [
           'site_theme_color'
         ],
@@ -114,7 +114,7 @@ class LesroidelarenoFormDonneeSite {
           ]
         ]
       ],
-      'step3.2' => [
+      'step2.2' => [
         'keys' => [
           'color_primary',
           'color_secondary',
@@ -131,24 +131,38 @@ class LesroidelarenoFormDonneeSite {
           ]
         ]
       ],
-      'step4' => [
+      'step3' => [
         'keys' => [
           'type_home_page'
         ]
       ],
-      'step5' => [
+      'step4' => [
         'keys' => [
           'pages'
         ]
       ],
+      'step5' => [
+        'keys' => [
+          'image_logo'
+        ]
+      ],
       'step6' => [
         'keys' => [
-          'image_logo',
+          'description'
+        ]
+      ],
+      'step7' => [
+        'keys' => [
+          'contenus_transferer_txt'
+        ]
+      ],
+      'step8' => [
+        'keys' => [
           'contenus_transferer'
         ]
       ],
       
-      'step7' => [
+      'step9' => [
         'keys' => [
           'demande_traitement'
         ]
@@ -168,12 +182,14 @@ class LesroidelarenoFormDonneeSite {
     $element = $form_state->getTriggeringElement();
     // debugLog::kintDebugDrupal($element, 'getTriggeringElement', true);
     // on determine l'etape suivante si l'origin est le bouton next ou suivant.
+    if ($model == 1)
+      $steppers = self::getStepper();
+    else
+      $steppers = self::getStepper2();
+    // \Drupal::messenger()->addStatus('name value = ' . $element['#name']);
     if ($form_state->has(FormDonneeSiteVar::$key_steps) && !empty($element['#name']) && $element['#name'] == 'op') {
       $steps = $form_state->get(FormDonneeSiteVar::$key_steps);
-      if ($model == 1)
-        $steppers = self::getStepper();
-      else
-        $steppers = self::getStepper2();
+      
       /**
        *
        * @var DonneeSiteInternetEntity $entity
@@ -221,7 +237,7 @@ class LesroidelarenoFormDonneeSite {
               if (!$valid)
                 continue;
             }
-            // \Drupal::messenger()->addStatus($k . ' value :: ' . json_encode($validStep), true);
+            // \Drupal::messenger()->addStatus($k, true);
             $validStep = false;
             foreach ($value['keys'] as $fieldName) {
               if (!empty($dsi_form[$fieldName])) {
@@ -383,11 +399,11 @@ class LesroidelarenoFormDonneeSite {
         $form_state->set(FormDonneeSiteVar::$key_steps, $steps);
       }
       elseif ($form_state->get('step_direction') == '-') {
+        // \Drupal::messenger()->addWarning('back : ');
         $key = array_key_last($steps);
         unset($steps[$key]);
         if (!empty($steps)) {
           $key = array_key_last($steps);
-          $steppers = self::getStepper();
           if (!empty($steppers[$key]['keys'])) {
             foreach ($steppers[$key]['keys'] as $fieldName) {
               $form[$fieldName] = $dsi_form[$fieldName];
@@ -409,7 +425,7 @@ class LesroidelarenoFormDonneeSite {
        */
       if (!empty($steps)) {
         $key = array_key_last($steps);
-        $steppers = self::getStepper();
+        // \Drupal::messenger()->addWarning('wating in : ');
         if (!empty($steppers[$key])) {
           foreach ($steppers[$key]['keys'] as $fieldName) {
             $form[$fieldName] = $dsi_form[$fieldName];
@@ -552,43 +568,43 @@ class LesroidelarenoFormDonneeSite {
     return [
       'contact' => [
         'titre' => 'Contactez nous ',
-        'description' => '',
-        'image' => ''
+        'description' => 'texte à mettre à jour',
+        'image' => 1589
       ],
       'service' => [
         'titre' => 'Services ',
-        'description' => '',
-        'image' => ''
+        'description' => 'texte à mettre à jour',
+        'image' => 1590
       ],
       'propos' => [
         'titre' => 'A propos de nous',
-        'description' => '',
-        'image' => ''
+        'description' => 'texte à mettre à jour',
+        'image' => 1591
       ],
       'personnel' => [
         'titre' => 'personnel ',
-        'description' => '',
-        'image' => ''
+        'description' => 'texte à mettre à jour',
+        'image' => 1592
       ],
       'tarif' => [
         'titre' => 'Nos tarifs ',
-        'description' => '',
-        'image' => ''
+        'description' => 'texte à mettre à jour',
+        'image' => 1593
       ],
       'realisations' => [
         'titre' => 'Realisations ',
-        'description' => '',
-        'image' => ''
+        'description' => 'texte à mettre à jour',
+        'image' => 1594
       ],
       'qui-sommes-nous' => [
         'titre' => 'Qui sommes nous ',
-        'description' => '',
-        'image' => ''
+        'description' => 'texte à mettre à jour',
+        'image' => 1595
       ],
       'blog' => [
         'titre' => 'Blog ',
-        'description' => '',
-        'image' => ''
+        'description' => 'texte à mettre à jour',
+        'image' => 1596
       ]
     ];
   }
