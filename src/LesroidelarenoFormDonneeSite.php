@@ -146,11 +146,11 @@ class LesroidelarenoFormDonneeSite {
           'image_logo'
         ]
       ],
-      'step6' => [
-        'keys' => [
-          'description'
-        ]
-      ],
+      // 'step6' => [
+      // 'keys' => [
+      // 'description'
+      // ]
+      // ],
       'step7' => [
         'keys' => [
           'contenus_transferer_txt'

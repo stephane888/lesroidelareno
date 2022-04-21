@@ -312,7 +312,7 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
     // 7.1 => l'utilisateur a du contenu.
     $fields['image_logo'] = BaseFieldDefinition::create('image')->setLabel(' Votre logo ')->setRequired(false)->setDisplayConfigurable('form', [
       'type' => 'image'
-    ])->setDisplayConfigurable('view', TRUE)->setSetting("min_resolution", "250x250");
+    ])->setDisplayConfigurable('view', TRUE)->setSetting("min_resolution", "250x250")->setSetting('alt_field', false)->setSetting('alt_field_required', false);
     //
     $fields['description'] = BaseFieldDefinition::create('text_long')->setLabel(" Description ")->setSettings([
       'text_processing' => 0
