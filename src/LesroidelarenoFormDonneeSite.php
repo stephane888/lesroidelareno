@@ -241,6 +241,7 @@ class LesroidelarenoFormDonneeSite {
             $validStep = false;
             foreach ($value['keys'] as $fieldName) {
               if (!empty($dsi_form[$fieldName])) {
+                
                 // On reconstruit les options en function du choix du type de site ou on recupere l'id du formulaire dans l'url (site-type-datas-id).
                 if ('type_home_page' == $fieldName) {
                   // On recupere la valeur du type_site;

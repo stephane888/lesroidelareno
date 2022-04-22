@@ -10,5 +10,7 @@
         }
     ],
     "minimum-stability": "dev",
-    "require": {}
+    "require": {
+    	"ovh/ovh": "^3.0"
+    }
 }

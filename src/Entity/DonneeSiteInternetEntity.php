@@ -223,7 +223,7 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
     ])->setDisplayOptions('form', [
       'type' => 'string_textfield',
       'weight' => -4
-    ])->setDisplayConfigurable('form', TRUE)->setDisplayConfigurable('view', TRUE)->setRequired(TRUE);
+    ])->setDisplayConfigurable('form', TRUE)->setDisplayConfigurable('view', TRUE)->setRequired(TRUE)->addConstraint('UniqueField', []);
     
     // 2 On doit preciser le taxo plus tard.( ce dernier vient de module creation de site virtuel ).
     $fields['type_site'] = BaseFieldDefinition::create('entity_reference')->setLabel(" Quel type de site souhaitez-vous créer ? ")->setDisplayOptions('form', [
