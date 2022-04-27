@@ -10,6 +10,7 @@ use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityPublishedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\user\UserInterface;
+use Jawira\CaseConverter\Convert;
 
 /**
  * Defines the Donnee site internet des utilisateurs entity.
@@ -108,11 +109,51 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
    */
   public function preSave(EntityStorageInterface $storage) {
     parent::preSave($storage);
-    
     // If no revision author has been set explicitly,
     // make the donnee_internet_entity owner the revision author.
     if (!$this->getRevisionUser()) {
       $this->setRevisionUserId($this->getOwnerId());
+    }
+  }
+  
+  /**
+   *
+   * {@inheritdoc}
+   * @see \Drupal\Core\Entity\ContentEntityBase::postSave()
+   */
+  public function postSave($storage, $update = true) {
+    parent::postSave($storage, $update);
+    $string = strlen($this->getName());
+    // Creation du domaine sur OVH.
+    if ($string >= 3) {
+      $textConvert = new Convert($this->getName());
+      $sub_domain = $textConvert->toKebab();
+      // Verifie si le nom de domaine existe deja.
+      $query = $this->entityTypeManager()->getStorage('domain_ovh_entity')->getQuery();
+      $query->condition('sub_domain', "%" . $sub_domain . "%", 'LIKE');
+      $entities = $query->execute();
+      if (!empty($entities)) {
+        $sub_domain .= count($entities) + 1;
+      }
+      //
+      try {
+        $DomainOvh = \Drupal\ovh_api_rest\Entity\DomainOvhEntity::create();
+        $DomainOvh->set('name', ' Generate domain : ' . $this->getName());
+        $DomainOvh->set('zone_name', 'lesroisdelareno.fr');
+        $DomainOvh->set('field_type', 'A');
+        $DomainOvh->set('sub_domain', $sub_domain);
+        $DomainOvh->set('target', '213.186.33.186');
+        $DomainOvh->set('path', '/domain/zone/lesroisdelareno.fr/record');
+        $DomainOvh->save();
+        //
+        if ($DomainOvh->id()) {
+          $this->setDomainOvhEntity($DomainOvh->id());
+          $this->save();
+        }
+      }
+      catch (\Exception $e) {
+        //
+      }
     }
   }
   
@@ -184,8 +225,20 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
     return $this;
   }
   
+  /**
+   *
+   * @param integer $target_id
+   */
   public function setTypeHomePage($target_id) {
     $this->set('type_home_page', $target_id);
+  }
+  
+  /**
+   *
+   * @param integer $target_id
+   */
+  public function setDomainOvhEntity($target_id) {
+    $this->set('domain_ovh_entity', $target_id);
   }
   
   /**
@@ -211,6 +264,21 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
         'placeholder' => ''
       ]
     ])->setDisplayConfigurable('form', TRUE)->setDisplayConfigurable('view', TRUE);
+    
+    $fields['domain_ovh_entity'] = BaseFieldDefinition::create('entity_reference')->setLabel(t('Domaine OVH'))->setSetting('target_type', 'domain_ovh_entity')->setSetting('handler', 'default')->setDisplayOptions('view', [
+      'label' => 'hidden',
+      'type' => 'author',
+      'weight' => 0
+    ])->setDisplayOptions('form', [
+      'type' => 'entity_reference_autocomplete',
+      'weight' => 5,
+      'settings' => [
+        'match_operator' => 'CONTAINS',
+        'size' => '60',
+        'autocomplete_type' => 'tags',
+        'placeholder' => ''
+      ]
+    ]);
     
     // 1
     $fields['name'] = BaseFieldDefinition::create('string')->setLabel(t(" Quel est le nom de votre entreprise "))->setDescription(t(' Vous pouvez le modifier à tout moment. '))->setRevisionable(TRUE)->setSettings([
