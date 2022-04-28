@@ -38,11 +38,16 @@ class DonneeSiteInternetEntityForm extends ContentEntityForm {
     return $instance;
   }
   
+  public function buildForm(array $form, FormStateInterface $form_state) {
+    $form = parent::buildForm($form, $form_state);
+    return $form;
+  }
+  
   /**
    *
    * {@inheritdoc}
    */
-  public function buildForm(array $form, FormStateInterface $form_state) {
+  public function buildForm0(array $form, FormStateInterface $form_state) {
     // vuejs_dev
     // $form['#attached']['library'][] = 'login_rx_vuejs/vuejs_dev';
     $formParents = [];
@@ -377,7 +382,7 @@ class DonneeSiteInternetEntityForm extends ContentEntityForm {
     $form_state->setRebuild(true);
   }
   
-  public function saveSubmit($form, FormStateInterface $form_state) {
+  public function saveSubmit0($form, FormStateInterface $form_state) {
     $entity = $form_state->get(FormDonneeSiteVar::$entity);
     $entity->save();
     
@@ -414,15 +419,15 @@ class DonneeSiteInternetEntityForm extends ContentEntityForm {
    * @see \Drupal\Core\Entity\ContentEntityForm::validateForm()
    */
   public function validateForm(array &$form, FormStateInterface $form_state) {
-    // $entity = parent::validateForm($form, $form_state);
-    // return $entity;
+    $entity = parent::validateForm($form, $form_state);
+    return $entity;
   }
   
   /**
    *
    * {@inheritdoc}
    */
-  public function save(array $form, FormStateInterface $form_state) {
+  public function save0(array $form, FormStateInterface $form_state) {
     $this->messenger()->addMessage('save entity', true);
     $entity = $this->entity;
     
@@ -449,6 +454,44 @@ class DonneeSiteInternetEntityForm extends ContentEntityForm {
       
       default:
         $this->messenger()->addMessage($this->t('Saved the %label Donnee site internet des utilisateurs.', [
+          '%label' => $entity->label()
+        ]));
+    }
+    $form_state->setRedirect('entity.donnee_internet_entity.canonical', [
+      'donnee_internet_entity' => $entity->id()
+    ]);
+  }
+  
+  /**
+   *
+   * {@inheritdoc}
+   */
+  public function save(array $form, FormStateInterface $form_state) {
+    $entity = $this->entity;
+    
+    // Save as a new revision if requested to do so.
+    if (!$form_state->isValueEmpty('new_revision') && $form_state->getValue('new_revision') != FALSE) {
+      $entity->setNewRevision();
+      
+      // If a new revision is created, save the current user as revision author.
+      $entity->setRevisionCreationTime($this->time->getRequestTime());
+      $entity->setRevisionUserId($this->account->id());
+    }
+    else {
+      $entity->setNewRevision(FALSE);
+    }
+    
+    $status = parent::save($form, $form_state);
+    
+    switch ($status) {
+      case SAVED_NEW:
+        $this->messenger()->addMessage($this->t('Created the %label Site internet entity.', [
+          '%label' => $entity->label()
+        ]));
+        break;
+      
+      default:
+        $this->messenger()->addMessage($this->t('Saved the %label Site internet entity.', [
           '%label' => $entity->label()
         ]));
     }

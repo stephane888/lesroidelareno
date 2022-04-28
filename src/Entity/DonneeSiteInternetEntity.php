@@ -123,9 +123,9 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
    */
   public function postSave($storage, $update = true) {
     parent::postSave($storage, $update);
-    $string = strlen($this->getName());
+    $string_nbre = strlen($this->getName());
     // Creation du domaine sur OVH.
-    if ($string >= 3) {
+    if ($string_nbre >= 3) {
       $textConvert = new Convert($this->getName());
       $sub_domain = $textConvert->toKebab();
       // Verifie si le nom de domaine existe deja.
@@ -135,24 +135,26 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
       if (!empty($entities)) {
         $sub_domain .= count($entities) + 1;
       }
-      //
-      try {
-        $DomainOvh = \Drupal\ovh_api_rest\Entity\DomainOvhEntity::create();
-        $DomainOvh->set('name', ' Generate domain : ' . $this->getName());
-        $DomainOvh->set('zone_name', 'lesroisdelareno.fr');
-        $DomainOvh->set('field_type', 'A');
-        $DomainOvh->set('sub_domain', $sub_domain);
-        $DomainOvh->set('target', '213.186.33.186');
-        $DomainOvh->set('path', '/domain/zone/lesroisdelareno.fr/record');
-        $DomainOvh->save();
-        //
-        if ($DomainOvh->id()) {
-          $this->setDomainOvhEntity($DomainOvh->id());
-          $this->save();
+      // On le cree si et seulement si il n'est pas deja crée.
+      if (empty($this->getDomainOvhEntity())) {
+        try {
+          $DomainOvh = \Drupal\ovh_api_rest\Entity\DomainOvhEntity::create();
+          $DomainOvh->set('name', ' Generate domain : ' . $this->getName());
+          $DomainOvh->set('zone_name', 'lesroisdelareno.fr');
+          $DomainOvh->set('field_type', 'A');
+          $DomainOvh->set('sub_domain', $sub_domain);
+          $DomainOvh->set('target', '213.186.33.186');
+          $DomainOvh->set('path', '/domain/zone/lesroisdelareno.fr/record');
+          $DomainOvh->save();
+          //
+          if ($DomainOvh->id()) {
+            $this->setDomainOvhEntity($DomainOvh->id());
+            $this->save();
+          }
         }
-      }
-      catch (\Exception $e) {
-        //
+        catch (\Exception $e) {
+          //
+        }
       }
     }
   }
@@ -241,6 +243,10 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
     $this->set('domain_ovh_entity', $target_id);
   }
   
+  public function getDomainOvhEntity() {
+    return $this->get('domain_ovh_entity')->target_id;
+  }
+  
   /**
    *
    * {@inheritdoc}
@@ -265,20 +271,10 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
       ]
     ])->setDisplayConfigurable('form', TRUE)->setDisplayConfigurable('view', TRUE);
     
-    $fields['domain_ovh_entity'] = BaseFieldDefinition::create('entity_reference')->setLabel(t('Domaine OVH'))->setSetting('target_type', 'domain_ovh_entity')->setSetting('handler', 'default')->setDisplayOptions('view', [
-      'label' => 'hidden',
-      'type' => 'author',
-      'weight' => 0
-    ])->setDisplayOptions('form', [
+    $fields['domain_ovh_entity'] = BaseFieldDefinition::create('entity_reference')->setLabel(t('Domaine OVH'))->setSetting('target_type', 'domain_ovh_entity')->setSetting('handler', 'default')->setDisplayOptions('form', [
       'type' => 'entity_reference_autocomplete',
-      'weight' => 5,
-      'settings' => [
-        'match_operator' => 'CONTAINS',
-        'size' => '60',
-        'autocomplete_type' => 'tags',
-        'placeholder' => ''
-      ]
-    ]);
+      'weight' => 5
+    ])->setDisplayConfigurable('form', TRUE)->setDisplayConfigurable('view', TRUE);
     
     // 1
     $fields['name'] = BaseFieldDefinition::create('string')->setLabel(t(" Quel est le nom de votre entreprise "))->setDescription(t(' Vous pouvez le modifier à tout moment. '))->setRevisionable(TRUE)->setSettings([
@@ -314,8 +310,8 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
       'auto_create_bundle' => ''
     ])->setSetting('target_type', 'taxonomy_term')->setSetting('handler', 'default')->setRevisionable(TRUE);
     
-    // 3
-    $fields['type_color_theme'] = BaseFieldDefinition::create('boolean')->setLabel(" Comment souhatitez vous definir les couleurs ? ")->setRequired(true)->setDisplayOptions('form', [
+    // // 3
+    $fields['type_color_theme'] = BaseFieldDefinition::create('boolean')->setLabel(" Comment souhatitez vous definir les couleurs ? ")->setDisplayOptions('form', [
       'type' => 'options_buttons',
       'weight' => -3,
       'settings' => []
@@ -342,7 +338,7 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
       'name' => ''
     ])->setDisplayConfigurable('form', true)->setDisplayConfigurable('view', TRUE);
     // 3.2
-    $fields['site_theme_color'] = BaseFieldDefinition::create('list_string')->setLabel(" Choisisez un theme de couleur  ")->setRequired(TRUE)->setSetting('allowed_values_function', [
+    $fields['site_theme_color'] = BaseFieldDefinition::create('list_string')->setLabel(" Choisisez un theme de couleur ")->setRequired(TRUE)->setSetting('allowed_values_function', [
       '\Drupal\lesroidelareno\LesroidelarenoFormDonneeSite',
       'getListThemeColor'
     ])->setDisplayOptions('view', [
@@ -362,7 +358,8 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
       'type' => 'selectfilter_theme',
       'weight' => 5,
       'settings' => []
-    ])->setDisplayConfigurable('form', TRUE)->setDisplayConfigurable('view', TRUE)->setDescription(t(" Les couleurs de theme seront mise à jour lors de la creation de votre model, vous pourriez toujours les modifier. "));
+    ])->setDisplayConfigurable('form', TRUE)->setDisplayConfigurable('view', TRUE)->setDescription(t(" Les couleurs de theme seront mise à jour lors de la creation de votre model, vous pourriez
+    toujours les modifier. "));
     
     // 5 Choix des pages que lon souhaite avoir.
     $fields['pages'] = BaseFieldDefinition::create('list_string')->setLabel(" Selectionner les pages ")->setRequired(TRUE)->setSetting('allowed_values_function', [
@@ -383,10 +380,10 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
     ]);
     
     // 7
-    // $fields['has_contents'] = BaseFieldDefinition::create('boolean')->setLabel(" Avez vous du contenu pour vos différentes pages ? ")->setRequired(true)->setDisplayOptions('form', [
-    // 'type' => 'options_buttons',
-    // 'weight' => -3
-    // ])->setDisplayOptions('view', [])->setDisplayConfigurable('view', TRUE)->setDisplayConfigurable('form', true)->setSetting('on_label', "Oui")->setSetting('off_label', 'Non')->setDescription(t("
+    $fields['has_contents'] = BaseFieldDefinition::create('boolean')->setLabel(" Avez vous du contenu pour vos différentes pages ? ")->setRequired(true)->setDisplayOptions('form', [
+      'type' => 'options_buttons',
+      'weight' => -3
+    ])->setDisplayOptions('view', [])->setDisplayConfigurable('view', TRUE)->setDisplayConfigurable('form', true)->setSetting('on_label', "Oui")->setSetting('off_label', 'Non')->setDescription(t("
     // Si vous n'avez pas de contenu, nous pouvons vous accompagnez dans sa redaction. "));
     
     // 7.1 => l'utilisateur a du contenu.
@@ -449,13 +446,14 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
     ])->setCardinality(-1);
     
     // 8
-    $fields['demande_traitement'] = BaseFieldDefinition::create('boolean')->setLabel(" Vos données sont t'elle complete ? ")->setRequired(true)->setDisplayOptions('form', [
+    $fields['demande_traitement'] = BaseFieldDefinition::create('boolean')->setLabel(" Vos données sont t'elle complete ? ")->setDisplayOptions('form', [
       'type' => 'options_buttons',
       'weight' => -3
-    ])->setDisplayOptions('view', [])->setDisplayConfigurable('view', TRUE)->setDisplayConfigurable('form', true)->setSetting('on_label', "Oui")->setSetting('off_label', 'Non ')->setDescription(t("NB: nous debuterons la construction  de votre site si vous avez selectionné 'oui'. "));
+    ])->setDisplayOptions('view', [])->setDisplayConfigurable('view', TRUE)->setDisplayConfigurable('form', true)->setSetting('on_label', "Oui")->setSetting('off_label', 'Non
+    ')->setDescription(t("NB: nous debuterons la construction de votre site si vous avez selectionné 'oui'. "));
     
     // 9
-    $fields['traitement_encours'] = BaseFieldDefinition::create('list_string')->setLabel(" Construction encours ... ")->setRequired(true)->setDisplayOptions('form', [
+    $fields['traitement_encours'] = BaseFieldDefinition::create('list_string')->setLabel(" Construction encours ... ")->setDisplayOptions('form', [
       'type' => 'options_buttons',
       'weight' => -3
     ])->setSetting('allowed_values_function', [
