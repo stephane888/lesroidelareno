@@ -362,7 +362,7 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
     toujours les modifier. "));
     
     // 5 Choix des pages que lon souhaite avoir.
-    $fields['pages'] = BaseFieldDefinition::create('list_string')->setLabel(" Selectionner les pages ")->setRequired(TRUE)->setSetting('allowed_values_function', [
+    $fields['pages'] = BaseFieldDefinition::create('list_string')->setLabel(" Veuillez selectionner les pages ")->setRequired(TRUE)->setSetting('allowed_values_function', [
       '\Drupal\lesroidelareno\LesroidelarenoFormDonneeSite',
       'getListPages'
     ])->setDisplayOptions('view', [
@@ -387,7 +387,7 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
     // Si vous n'avez pas de contenu, nous pouvons vous accompagnez dans sa redaction. "));
     
     // 7.1 => l'utilisateur a du contenu.
-    $fields['image_logo'] = BaseFieldDefinition::create('image')->setLabel(' Votre logo ')->setRequired(false)->setDisplayConfigurable('form', [
+    $fields['image_logo'] = BaseFieldDefinition::create('image')->setLabel(" Veuillez inserer le logo de l'entreprise ")->setRequired(false)->setDisplayConfigurable('form', [
       'type' => 'image'
     ])->setDisplayConfigurable('view', TRUE)->setSetting("min_resolution", "250x250")->setSetting('alt_field', false)->setSetting('alt_field_required', false);
     //
