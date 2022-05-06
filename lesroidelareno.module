@@ -332,7 +332,7 @@ function lesroidelareno_preprocess_commerce_product(&$vars) {
       if ($fieldUrl && $namePartenaire) {
         $url = $fieldUrl->getValue();
         $tid = $namePartenaire->getValue();
-        if (!empty($url['value']) && $tid['target_id']) {
+        if (!empty($url['value']) && $tid['target_id'] && !empty($vars['product']['field_localisation'])) {
           $vars['product_url'] = $url['value'];
           $vars['localisation'] = $vars['product']['field_localisation'];
           /**

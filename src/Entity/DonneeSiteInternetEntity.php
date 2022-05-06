@@ -128,6 +128,7 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
     if ($string_nbre >= 3) {
       $textConvert = new Convert($this->getName());
       $sub_domain = $textConvert->toKebab();
+      $sub_domain = preg_replace('/[^a-z0-9\-]/', "", $sub_domain);
       // Verifie si le nom de domaine existe deja.
       $query = $this->entityTypeManager()->getStorage('domain_ovh_entity')->getQuery();
       $query->condition('sub_domain', "%" . $sub_domain . "%", 'LIKE');
