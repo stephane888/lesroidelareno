@@ -385,7 +385,7 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
       'type' => 'options_buttons',
       'weight' => -3
     ])->setDisplayOptions('view', [])->setDisplayConfigurable('view', TRUE)->setDisplayConfigurable('form', true)->setSetting('on_label', "Oui")->setSetting('off_label', 'Non')->setDescription(t("
-    // Si vous n'avez pas de contenu, nous pouvons vous accompagnez dans sa redaction. "));
+     Si vous n'avez pas de contenu, nous pouvons vous accompagnez dans sa redaction. "));
     
     // 7.1 => l'utilisateur a du contenu.
     $fields['image_logo'] = BaseFieldDefinition::create('image')->setLabel(" Veuillez inserer le logo de l'entreprise ")->setRequired(false)->setDisplayConfigurable('form', [
