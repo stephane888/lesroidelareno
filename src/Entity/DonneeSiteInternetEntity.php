@@ -124,7 +124,7 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
   public function postSave($storage, $update = true) {
     parent::postSave($storage, $update);
     $string_nbre = strlen($this->getName());
-    // Creation du domaine sur OVH.
+    // On cree l'entite qui permettra de creer le domaine sur OVH.
     if ($string_nbre >= 3) {
       $textConvert = new Convert($this->getName());
       $sub_domain = $textConvert->toKebab();
@@ -139,13 +139,24 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
       // On le cree si et seulement si il n'est pas deja crée.
       if (empty($this->getDomainOvhEntity())) {
         try {
+          $config = \Drupal::config('ovh_api_rest.settings');
+          $conf = $config->getRawData();
+          if (empty($conf['zone_name'])) {
+            /**
+             *
+             * @var \Psr\Log\LoggerInterface $logger
+             */
+            $logger = \Drupal::logger('generate_style_theme');
+            $logger->warning("Le module ovh n'est pas correctement configurer");
+            throw new \LogicException("Le module ovh n'est pas correctement configurer");
+          }
           $DomainOvh = \Drupal\ovh_api_rest\Entity\DomainOvhEntity::create();
           $DomainOvh->set('name', ' Generate domain : ' . $this->getName());
-          $DomainOvh->set('zone_name', 'lesroisdelareno.fr');
-          $DomainOvh->set('field_type', 'A');
+          $DomainOvh->set('zone_name', $conf['zone_name']);
+          $DomainOvh->set('field_type', $conf['field_type']);
           $DomainOvh->set('sub_domain', $sub_domain);
-          $DomainOvh->set('target', '213.186.33.186');
-          $DomainOvh->set('path', '/domain/zone/lesroisdelareno.fr/record');
+          $DomainOvh->set('target', $conf['target']);
+          $DomainOvh->set('path', $conf['path']);
           $DomainOvh->save();
           //
           if ($DomainOvh->id()) {
@@ -290,7 +301,8 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
       'weight' => -4
     ])->setDisplayConfigurable('form', TRUE)->setDisplayConfigurable('view', TRUE)->setRequired(TRUE)->addConstraint('UniqueField', []);
     
-    // 2 On doit preciser le taxo plus tard.( ce dernier vient de module creation de site virtuel ).
+    // 2 On doit preciser le taxo plus tard.( ce dernier vient de module
+    // creation de site virtuel ).
     $fields['type_site'] = BaseFieldDefinition::create('entity_reference')->setLabel(" Quel type de site souhaitez-vous créer ? ")->setDisplayOptions('form', [
       'type' => 'options_select',
       'weight' => 5,
