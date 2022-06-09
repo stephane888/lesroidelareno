@@ -12,7 +12,6 @@ use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Url;
 use Symfony\Component\HttpFoundation\Request;
 use Drupal\Core\Entity\EntityInterface;
-
 use Drupal\domain_access\DomainAccessManagerInterface;
 use Drupal\commerce_product\Entity\Product;
 
@@ -200,7 +199,7 @@ class LesroidelarenoPathProcessor implements OutboundPathProcessorInterface {
     // $entity->toUrl()
     $value = $entity->get(DomainAccessManagerInterface::DOMAIN_ACCESS_FIELD)->getValue();
     if (!empty($value[0])) {
-      $target_id = $value[0]['value'];
+      $target_id = $value[0]['target_id'];
       
       if ($domain = \Drupal::entityTypeManager()->getStorage('domain')->load($target_id)) {
         $source = $domain->id();

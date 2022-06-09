@@ -6,7 +6,6 @@ use Drupal\Core\Entity\EntityInterface;
 use Drupal\views\ViewExecutable;
 use Drupal\Core\Access\AccessResult;
 use Drupal\Core\Entity\EntityTypeInterface;
-use Drupal\wbumenudomain\WbumenudomainMenuItemDecorating;
 use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\file\Entity\File;
 use Drupal\image\Entity\ImageStyle;
@@ -19,29 +18,30 @@ use Drupal\Component\Utility\Html;
  *        $vars
  */
 function lesroidelareno_preprocess_html(&$vars) {
-  $parameters = \Drupal::routeMatch()->getParameters()->all();
-  if (!empty($parameters['content_generate_entity'])) {
-    /**
-     *
-     * @var \Drupal\generate_mapping_content\Entity\ContentGenerateEntity $contentGenerate
-     */
-    $contentGenerate = $parameters['content_generate_entity'];
-    $intro = $contentGenerate->get('introduction')->value;
-    $metaDescription = [
-      '#tag' => 'meta',
-      '#attributes' => [
-        'name' => 'description',
-        'content' => strip_tags($intro)
-      ]
-    ];
-    $vars['page']['#attached']['html_head'][] = [
-      $metaDescription,
-      'meta-description'
-    ];
-  }
-  else {
-    $vars['page']['#attached']['library'][] = 'login_rx_vuejs/vuejs_dev';
-  }
+  // $parameters = \Drupal::routeMatch()->getParameters()->all();
+  // if (!empty($parameters['content_generate_entity'])) {
+  // /**
+  // *
+  // * @var \Drupal\generate_mapping_content\Entity\ContentGenerateEntity
+  // $contentGenerate
+  // */
+  // $contentGenerate = $parameters['content_generate_entity'];
+  // $intro = $contentGenerate->get('introduction')->value;
+  // $metaDescription = [
+  // '#tag' => 'meta',
+  // '#attributes' => [
+  // 'name' => 'description',
+  // 'content' => strip_tags($intro)
+  // ]
+  // ];
+  // $vars['page']['#attached']['html_head'][] = [
+  // $metaDescription,
+  // 'meta-description'
+  // ];
+  // }
+  // else {
+  // $vars['page']['#attached']['library'][] = 'login_rx_vuejs/vuejs_dev';
+  // }
 }
 
 function lesroidelareno_preprocess_facets_result_item__checkbox(&$vars) {
@@ -110,7 +110,8 @@ function lesroidelareno_preprocess_facets_result_item__checkbox(&$vars) {
 function lesroidelareno_preprocess_pager(array &$variables) {
   $element = $variables['pager']['#element'];
   $parameters = $variables['pager']['#parameters'];
-  // $quantity = empty($variables['pager']['#quantity']) ? 0 : $variables['pager']['#quantity'];
+  // $quantity = empty($variables['pager']['#quantity']) ? 0 :
+  // $variables['pager']['#quantity'];
   $route_name = $variables['pager']['#route_name'];
   $route_parameters = $variables['pager']['#route_parameters'] ?? [];
   /** @var \Drupal\Core\Pager\PagerManagerInterface $pager_manager */
@@ -252,142 +253,11 @@ function _lesroidelareno_get_product_theme(Drupal\commerce_product\Entity\Produc
 }
 
 /**
- *
- * @param Array $vars
- */
-function lesroidelareno_preprocess_commerce_product(&$vars) {
-  //
-  $activeDomain = WbumenudomainMenuItemDecorating::getCurrentActiveDomaineByUrl();
-  $vars['external_domaine'] = false;
-  $vars['vendu_en_magazin'] = false;
-  $vars['localisation'] = false;
-  
-  /**
-   *
-   * @var \Drupal\commerce_product\Entity\Product $product
-   */
-  $product = $vars['product_entity'];
-  $domain = $product->get('field_domain_access')->offsetGet(0)->getValue();
-  
-  if (!empty($domain) && !empty($activeDomain)) {
-    if ($domain['value'] !== $activeDomain) {
-      $vars['external_domaine'] = true;
-    }
-  }
-  
-  // dump( $vars['elements']['#commerce_product'] );
-  /**
-   *
-   * @var \Drupal\commerce_product\Entity\Product $commerce_product
-   */
-  $commerce_product = $vars['elements']['#commerce_product'];
-  if ($commerce_product->hasField('field_prestataires') || $commerce_product->hasField('field_url_partenaire_exterieur') && $commerce_product->hasField('field_nom_partenaire_exterieur')) {
-    $fieldPartenaire = $commerce_product->get('field_prestataires')->first();
-    /**
-     * Vendu par un partenaire enregistrer sur lesroisdelareno.
-     */
-    if ($fieldPartenaire) {
-      $nid = $fieldPartenaire->getValue();
-      if (!empty($nid['target_id'])) {
-        $StoregeNode = \Drupal::entityTypeManager()->getStorage('node');
-        /**
-         *
-         * @var \Drupal\node\Entity\Node $node
-         */
-        $node = $StoregeNode->load($nid['target_id']);
-        $field_name = 'field_profil_titre';
-        $name_entreprise = null;
-        // field_profil_titre
-        if ($node->hasField($field_name)) {
-          $nm = $node->get($field_name)->first();
-          if (!empty($nm)) {
-            $vl = $nm->getValue();
-            if (!empty($vl['value'])) {
-              $name_entreprise = $vl['value'];
-            }
-          }
-        }
-        if (empty($name_entreprise)) {
-          $name_entreprise = $node->getTitle();
-        }
-        $vars['vendu_en_magazin'] = $name_entreprise;
-        $optionsUrl = [
-          'absolute' => false
-        ];
-        $url = \Drupal\Core\Url::fromRoute('entity.node.canonical', [
-          'node' => $nid['target_id']
-        ], $optionsUrl);
-        $vars['product_url'] = $url->toString();
-        $vars['localisation'] = $node->get('field_localisation')->view([
-          'label' => 'hidden'
-        ]);
-      }
-    }
-    else {
-      /**
-       * Si l'utilisateur a definie l'url et le nom du partenaire externe.
-       */
-      $fieldUrl = $commerce_product->get('field_url_partenaire_exterieur')->first();
-      $namePartenaire = $commerce_product->get('field_nom_partenaire_exterieur')->first();
-      if ($fieldUrl && $namePartenaire) {
-        $url = $fieldUrl->getValue();
-        $tid = $namePartenaire->getValue();
-        if (!empty($url['value']) && $tid['target_id'] && !empty($vars['product']['field_localisation'])) {
-          $vars['product_url'] = $url['value'];
-          $vars['localisation'] = $vars['product']['field_localisation'];
-          /**
-           * Load name term.
-           */
-          $term = \Drupal\taxonomy\Entity\Term::load($tid['target_id']);
-          if ($term)
-            $vars['vendu_en_magazin'] = $term->getName();
-        }
-      }
-    }
-  }
-}
-
-/**
- * implement hook_entity_base_field_info
- * use command to update : vendor/bin/drush entup
- *
- * @file
- * Primary module hooks for wbumenudomain module.
- *
- * @see https://www.drupal.org/docs/drupal-apis/entity-api/fieldtypes-fieldwidgets-and-fieldformatters to get all types BaseFieldDefinition;
- *     
- * @DCG
- * This file is no longer required in Drupal 8.
- * @see https://www.drupal.org/node/2217931
- */
-function lesroidelareno_entity_base_field_info(EntityTypeInterface $entity_type) {
-  $fields = [];
-  if ($entity_type->id() === 'block_content') {
-    $fields['user_id'] = BaseFieldDefinition::create('entity_reference')->setLabel(t(' User Name '))->setRequired(TRUE)->setDescription(t('The Name of the associated user.'))->setSetting('target_type', 'user')->setSetting('handler', 'default')->setDisplayOptions('view', array(
-      'label' => 'above',
-      'type' => 'entity_reference_label',
-      'weight' => -3
-    ))->setDisplayOptions('form', [
-      'type' => 'entity_reference_autocomplete',
-      'settings' => array(
-        'match_operator' => 'CONTAINS',
-        'size' => 60,
-        'autocomplete_type' => 'tags',
-        'placeholder' => ''
-      ),
-      'weight' => -3
-    ])->setDisplayConfigurable('form', TRUE)->setDisplayConfigurable('view', TRUE)->setDefaultValueCallback('\Drupal\lesroidelareno\lesroidelareno::getCurrentUser');
-    return $fields;
-  }
-  return $fields;
-}
-
-/**
  * implement hook_ENTITY_TYPE_access
  */
 function lesroidelareno_commerce_product_variation_access(\Drupal\Core\Entity\EntityInterface $entity, $operation, \Drupal\Core\Session\AccountInterface $account) {
   // if ($operation === 'view')
-  return AccessResult::allowed();
+  // return AccessResult::allowed();
 }
 
 /**
