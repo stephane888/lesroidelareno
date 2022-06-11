@@ -43,3 +43,10 @@ lesroidelareno_login:
   dependencies:
     - core/drupalSettings
     - lesroidelareno/jquery-labelauty
+    
+#tawk
+lesroidelareno_tawk.config:
+  js:
+    js/tawk-config.js: {}
+    
+    

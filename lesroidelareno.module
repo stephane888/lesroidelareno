@@ -18,6 +18,7 @@ use Drupal\Component\Utility\Html;
  *        $vars
  */
 function lesroidelareno_preprocess_html(&$vars) {
+  $routeName = \Drupal::routeMatch()->getRouteName();
   // $parameters = \Drupal::routeMatch()->getParameters()->all();
   // if (!empty($parameters['content_generate_entity'])) {
   // /**
@@ -42,6 +43,11 @@ function lesroidelareno_preprocess_html(&$vars) {
   // else {
   // $vars['page']['#attached']['library'][] = 'login_rx_vuejs/vuejs_dev';
   // }
+  //
+  // On charge tawk sur les routes non admin.
+  if (!str_contains($routeName, 'system.admin')) {
+    $vars['page']['#attached']['library'][] = 'lesroidelareno/lesroidelareno_tawk.config';
+  }
 }
 
 function lesroidelareno_preprocess_facets_result_item__checkbox(&$vars) {

@@ -11,6 +11,7 @@ use Drupal\Core\Entity\EntityPublishedTrait;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\user\UserInterface;
 use Jawira\CaseConverter\Convert;
+use Stephane888\Debug\Repositories\ConfigDrupal;
 
 /**
  * Defines the Donnee site internet des utilisateurs entity.
@@ -139,8 +140,7 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
       // On le cree si et seulement si il n'est pas deja crée.
       if (empty($this->getDomainOvhEntity())) {
         try {
-          $config = \Drupal::config('ovh_api_rest.settings');
-          $conf = $config->getRawData();
+          $conf = ConfigDrupal::config('ovh_api_rest.settings');
           if (empty($conf['zone_name'])) {
             /**
              *
