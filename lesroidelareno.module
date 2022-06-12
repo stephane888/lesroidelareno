@@ -11,6 +11,7 @@ use Drupal\file\Entity\File;
 use Drupal\image\Entity\ImageStyle;
 use Drupal\Core\Url;
 use Drupal\Component\Utility\Html;
+use Drupal\Core\Template\Attribute;
 
 /**
  *
@@ -47,6 +48,16 @@ function lesroidelareno_preprocess_html(&$vars) {
   // On charge tawk sur les routes non admin.
   if (!str_contains($routeName, 'system.admin')) {
     $vars['page']['#attached']['library'][] = 'lesroidelareno/lesroidelareno_tawk.config';
+  }
+  //
+  if ('entity.taxonomy_term.canonical' == $routeName) {
+    if (empty($vars['page']['content']['attributes'])) {
+      $Attribute = new Attribute();
+      $Attribute->addClass('container');
+      $vars['page']['content']['attributes'] = $Attribute;
+    }
+    else
+      $vars['page']['content']['attributes']->addClass('container');
   }
 }
 
