@@ -13,6 +13,9 @@ use Drupal\Core\Url;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Template\Attribute;
 use Drupal\domain_access\DomainAccessManagerInterface;
+use Drupal\commerce_product\Entity\ProductVariation;
+use Drupal\block_content\Entity\BlockContent;
+use Drupal\Core\Session\AccountInterface;
 
 /**
  * Implements hook_theme().
@@ -26,6 +29,17 @@ function lesroidelareno_theme() {
     'file' => 'lesroidelareno.theme.inc'
   ];
   return $hooks;
+}
+
+/**
+ *
+ * @param \Drupal\commerce_product\Entity\Product $product
+ * @param string $operation
+ * @param \Drupal\Core\Session\AccountInterface $account
+ */
+function lesroidelareno_commerce_product_variation_access(ProductVariation $product, $operation, AccountInterface $account) {
+  //
+  // dump($operation);
 }
 
 function lesroidelareno_preprocess_views_view__render(&$vars) {
@@ -330,19 +344,12 @@ function _lesroidelareno_get_product_theme(Drupal\commerce_product\Entity\Produc
 /**
  * implement hook_ENTITY_TYPE_access
  */
-function lesroidelareno_commerce_product_variation_access(\Drupal\Core\Entity\EntityInterface $entity, $operation, \Drupal\Core\Session\AccountInterface $account) {
-  // if ($operation === 'view')
-  // return AccessResult::allowed();
+function lesroidelareno_block_content_access(BlockContent $entity, $operation, AccountInterface $account) {
+  if ($operation == 'update') {
+    if ($entity->get('user_id')->target_id == $account->id())
+      return AccessResult::allowed();
+  }
 }
-
-/**
- * implement hook_ENTITY_TYPE_access
- */
-// function
-// lesroidelareno_block_content_access(\Drupal\Core\Entity\EntityInterface
-// $entity, $operation, \Drupal\Core\Session\AccountInterface $account) {
-// // dump($operation);
-// }
 
 /**
  * Implements hook_views_data_alter().
@@ -402,5 +409,15 @@ function lesroidelareno_views_data_alter(array &$data) {
     ];
   }
 }
+
+/**
+ * implement hook_ENTITY_TYPE_access
+ */
+function lesroidelareno_domain_access(\Drupal\Core\Entity\EntityInterface $entity, $operation, AccountInterface $account) {
+  if ($operation == 'view') {
+    //
+  }
+}
+
 
 
