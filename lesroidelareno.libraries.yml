@@ -1,4 +1,15 @@
 # Custom module library for general purposes.
+lesroidelareno_admin:
+  js:
+    js/lesroidelareno-admin.js: {}
+  css:
+    component:
+      css/lesroidelareno-admin.css: {}
+  dependencies:
+    - core/drupalSettings
+    - lesroidelareno/jquery-labelauty
+    
+# Custom module library for general purposes.
 lesroidelareno:
   js:
     js/lesroidelareno.js: {}

@@ -16,6 +16,8 @@ use Drupal\domain_access\DomainAccessManagerInterface;
 use Drupal\commerce_product\Entity\ProductVariation;
 use Drupal\block_content\Entity\BlockContent;
 use Drupal\Core\Session\AccountInterface;
+use Drupal\Core\Field\FieldDefinitionInterface;
+use Drupal\Core\Field\FieldItemListInterface;
 
 /**
  * Implements hook_theme().
@@ -121,7 +123,7 @@ function lesroidelareno_preprocess_html(&$vars) {
   if (!str_contains($routeName, 'system.admin')) {
     $vars['page']['#attached']['library'][] = 'lesroidelareno/lesroidelareno_tawk.config';
   }
-  //
+  // On ajoute la class 'container' sur tous les pages de termes taxo.
   if ('entity.taxonomy_term.canonical' == $routeName) {
     if (empty($vars['page']['content']['attributes'])) {
       $Attribute = new Attribute();
@@ -130,6 +132,11 @@ function lesroidelareno_preprocess_html(&$vars) {
     }
     else
       $vars['page']['content']['attributes']->addClass('container');
+  }
+  // On charge la bibiotheque pour ameliorer la presentation de l'edition des
+  // forms et ...
+  if ('entity.taxonomy_term.canonical' == $routeName || str_contains($routeName, '.edit_form')) {
+    $vars['page']['#attached']['library'][] = 'lesroidelareno/lesroidelareno_admin';
   }
 }
 
@@ -352,9 +359,44 @@ function lesroidelareno_block_content_access(BlockContent $entity, $operation, A
 }
 
 /**
+ * Implements hook_entity_field_access().
+ */
+function lesroidelareno_entity_field_access($operation, FieldDefinitionInterface $field_definition, AccountInterface $account, FieldItemListInterface $items = NULL) {
+  // $context = ($operation == 'view') ? 'display' : 'edit';
+  // if (!$field_definition->isDisplayConfigurable($context) || empty($items)) {
+  // return AccessResult::neutral();
+  // }
+  // $access_field =
+  // \Drupal::service('field_permissions.permissions_service')->getFieldAccess($operation,
+  // $items, $account, $field_definition);
+  // if (!$access_field) {
+  // return AccessResult::forbidden();
+  // }
+  $disabledFields = [
+    'field_domain_access',
+    'user_id',
+    'field_domain_source',
+    'is_home_page',
+    'is_default_theme',
+    'path'
+  ];
+  
+  if (in_array($field_definition->getName(), $disabledFields)) {
+    if (in_array('administrator', $account->getRoles())) {
+      return AccessResult::allowed();
+    }
+    else
+      return AccessResult::forbidden();
+  }
+  // dump($field_definition->getName());
+  return AccessResult::neutral();
+}
+
+/**
  * Implements hook_views_data_alter().
  */
 function lesroidelareno_views_data_alter(array &$data) {
+  \Stephane888\Debug\debugLog::kintDebugDrupal($data, 'lesroidelareno_views_data_alter', true);
   /**
    * Ajout du filtre de domain pour les produits.
    * on identifie notre filtre avec 'product_field_domain_access'.
@@ -363,8 +405,6 @@ function lesroidelareno_views_data_alter(array &$data) {
    */
   if (!empty($data['commerce_product__field_domain_access'])) {
     // \Stephane888\Debug\debugLog::$max_depth = 7;
-    // \Stephane888\Debug\debugLog::kintDebugDrupal($data['commerce_product__field_domain_access'],
-    // 'lesroidelareno_views_data_alter', true);
     $data['commerce_product__field_domain_access']['product_field_domain_access'] = [
       'title' => t('Current domain'),
       'group' => t('Domain'),
@@ -405,6 +445,22 @@ function lesroidelareno_views_data_alter(array &$data) {
         'id' => 'lesroidelareno_domain_filter',
         'title' => t(' Available on current domain '),
         'help' => t(' Filters out nodes available on current domain ( published to current domain or all affiliates ). ')
+      ]
+    ];
+  }
+  
+  /**
+   * On ajoute le filtre pour filtrer les differents modeles de themes.
+   */
+  if ($data['site_type_datas__terms']) {
+    $data['site_type_datas__terms']['filter_theme_model'] = [
+      'title' => t('Filtre de theme'),
+      'group' => t('Filtre de theme'),
+      'filter' => [
+        'field' => 'terms_target_id',
+        'id' => 'lesroidelareno_tag_filter',
+        'title' => t(' Filtre de theme '),
+        'help' => t(" Permet de filtrer les themes en function de l'id du terme taxonomie ")
       ]
     ];
   }

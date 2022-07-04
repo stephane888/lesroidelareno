@@ -31,7 +31,8 @@ class lesroidelarenoDomainFilter extends BooleanOperator {
    * {@inheritdoc}
    */
   protected function operators() {
-    return [];
+    $options = parent::operators();
+    return $options;
   }
   
   /**
