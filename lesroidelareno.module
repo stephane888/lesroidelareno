@@ -40,7 +40,6 @@ function lesroidelareno_theme() {
  * @param \Drupal\Core\Session\AccountInterface $account
  */
 function lesroidelareno_commerce_product_variation_access(ProductVariation $product, $operation, AccountInterface $account) {
-  //
   // dump($operation);
 }
 
@@ -475,5 +474,67 @@ function lesroidelareno_domain_access(\Drupal\Core\Entity\EntityInterface $entit
   }
 }
 
+function lesroidelareno_query_alter(\Drupal\Core\Database\Query\AlterableInterface $query) {
+  // \Stephane888\Debug\debugLog::kintDebugDrupal($query,
+  // "lesroidelareno_query_alter", true);
+  // if ($query
+  // ->hasTag('micro_limit')) {
+  // $query
+  // ->range(0, 2);
+  // }
+}
+
+/**
+ * implement hook_query_entityreference_alter
+ * Filtrer les requetes de recherche via le domaine tant que cela est possible.
+ *
+ * @param \Drupal\Core\Database\Query\AlterableInterface $query
+ */
+function lesroidelareno_query_entity_reference_alter(\Drupal\mysql\Driver\Database\mysql\Select $query) {
+  /**
+   *
+   * @var \Drupal\domain\DomainNegotiator $domain
+   */
+  $domain = \Drupal::service('domain.negotiator');
+  
+  /**
+   *
+   * @var \Drupal\node\Plugin\EntityReferenceSelection\NodeSelection $entity_reference
+   */
+  $entity_reference = $query->getMetaData('entity_reference_selection_handler');
+  // \Stephane888\Debug\debugLog::kintDebugDrupal($entity_reference->getConfiguration(),
+  // "lesroidelareno_query_entityreference_alter", true);
+  $settings = $entity_reference->getConfiguration();
+  if (!empty($settings['target_type'])) {
+    switch ($settings['target_type']) {
+      case 'node':
+        $query->addJoin('INNER', 'node__field_domain_access', 'fda');
+        $query->condition('fda.field_domain_access_target_id', $domain->getActiveId());
+        break;
+      default:
+        \Drupal::messenger()->addWarning("Cet filtre doit etre correctement configurer : " . $settings['target_type']);
+        break;
+    }
+  }
+  
+  // $field = $query->getMetadata('field');
+  // if ($field['field_name'] != 'field_foo') {
+  // // This is not the field we want to alter.
+  // return;
+  // }
+  
+  // // Get the base table.
+  // $tables = $query->getTables();
+  // $base_table = key($tables);
+  
+  // // Join to the new table.
+  // $field_bar = field_info_field('field_drawer_type');
+  // $table_name = _field_sql_storage_tablename($field_bar);
+  // $query->innerJoin($table_name, 'drawer_type', '%alias.entity_id = ' .
+  // $base_table . '.tid');
+  
+  // // Add conditions.
+  // $query->condition('drawer_type.field_bar_value', 'baz', '=');
+}
 
 
