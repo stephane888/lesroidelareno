@@ -18,6 +18,8 @@ use Drupal\block_content\Entity\BlockContent;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Field\FieldDefinitionInterface;
 use Drupal\Core\Field\FieldItemListInterface;
+use Drupal\user\Entity\Role;
+use Drupal\user\Entity\User;
 
 /**
  * Implements hook_theme().
@@ -31,6 +33,32 @@ function lesroidelareno_theme() {
     'file' => 'lesroidelareno.theme.inc'
   ];
   return $hooks;
+}
+
+/**
+ * Alter the fields used to represent an entity in the IEF table.
+ *
+ * @param array $fields
+ *        The fields, keyed by field name.
+ * @param array $context
+ *        An array with the following keys:
+ *        - parent_entity_type: The type of the parent entity.
+ *        - parent_bundle: The bundle of the parent entity.
+ *        - field_name: The name of the reference field on which IEF is
+ *        operating.
+ *        - entity_type: The type of the referenced entities.
+ *        - allowed_bundles: Bundles allowed on the reference field.
+ *        
+ * @see \Drupal\inline_entity_form\InlineFormInterface::getTableFields()
+ */
+function lesroidelareno_inline_entity_form_table_fields_alter(array &$fields, array $context) {
+  if ($context['entity_type'] == 'node') {
+    $fields['nid'] = [
+      'type' => 'field',
+      'label' => t('ID'),
+      'weight' => 0
+    ];
+  }
 }
 
 /**
@@ -508,8 +536,9 @@ function lesroidelareno_query_entity_reference_alter(\Drupal\mysql\Driver\Databa
   if (!empty($settings['target_type'])) {
     switch ($settings['target_type']) {
       case 'node':
-        $query->addJoin('INNER', 'node__field_domain_access', 'fda');
+        $query->addJoin('INNER', 'node__field_domain_access', 'fda', 'fda.entity_id=base_table.nid');
         $query->condition('fda.field_domain_access_target_id', $domain->getActiveId());
+        $query->addField('fda', 'field_domain_access_target_id');
         break;
       default:
         \Drupal::messenger()->addWarning("Cet filtre doit etre correctement configurer : " . $settings['target_type']);
@@ -535,6 +564,60 @@ function lesroidelareno_query_entity_reference_alter(\Drupal\mysql\Driver\Databa
   
   // // Add conditions.
   // $query->condition('drawer_type.field_bar_value', 'baz', '=');
+}
+
+/**
+ * --forcing
+ *
+ * @deprecated
+ * @param array $vars
+ */
+function lesroidelareno_preprocess_clothingslayoutstitre(&$vars) {
+  /**
+   *
+   * @var \Drupal\Core\Layout\LayoutDefinition $layout
+   *
+   */
+  $layout = $vars['content']['#layout'];
+  // dump($layout->);
+}
+
+/**
+ * --forcing
+ *
+ * @deprecated
+ * @param array $vars
+ */
+function lesroidelareno_preprocess_formatage_models_simple_block(&$vars) {
+  if (!empty($vars['settings']['layoutrestrictions']['roles'])) {
+    $validRoles = [
+      'administrator'
+    ];
+    /**
+     *
+     * @var User $user
+     */
+    $user = User::load(\Drupal::currentUser()->id());
+    $currentRoles = $user->getRoles();
+    foreach ($vars['settings']['layoutrestrictions']['roles'] as $value) {
+      if ($value)
+        $validRoles[] = $value;
+    }
+    //
+    if (!empty($validRoles)) {
+      $access = false;
+      foreach ($validRoles as $role) {
+        if (in_array($role, $currentRoles)) {
+          $access = true;
+          break;
+        }
+      }
+      if (!$access) {
+        $vars['content'] = [];
+      }
+    }
+    //
+  }
 }
 
 
