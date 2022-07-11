@@ -573,13 +573,34 @@ function lesroidelareno_query_entity_reference_alter(\Drupal\mysql\Driver\Databa
  * @param array $vars
  */
 function lesroidelareno_preprocess_clothingslayoutstitre(&$vars) {
-  /**
-   *
-   * @var \Drupal\Core\Layout\LayoutDefinition $layout
-   *
-   */
-  $layout = $vars['content']['#layout'];
-  // dump($layout->);
+  if (!empty($vars['settings']['layoutrestrictions']['roles'])) {
+    $validRoles = [
+      'administrator'
+    ];
+    /**
+     *
+     * @var User $user
+     */
+    $user = User::load(\Drupal::currentUser()->id());
+    $currentRoles = $user->getRoles();
+    foreach ($vars['settings']['layoutrestrictions']['roles'] as $value) {
+      if ($value)
+        $validRoles[] = $value;
+    }
+    //
+    if (!empty($validRoles)) {
+      $access = false;
+      foreach ($validRoles as $role) {
+        if (in_array($role, $currentRoles)) {
+          $access = true;
+          break;
+        }
+      }
+      if (!$access) {
+        $vars['content'] = [];
+      }
+    }
+  }
 }
 
 /**
@@ -616,7 +637,6 @@ function lesroidelareno_preprocess_formatage_models_simple_block(&$vars) {
         $vars['content'] = [];
       }
     }
-    //
   }
 }
 
