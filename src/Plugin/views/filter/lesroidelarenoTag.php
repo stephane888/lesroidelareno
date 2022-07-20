@@ -296,16 +296,7 @@ class lesroidelarenoTag extends InOperator {
       $this->secondOptions = [];
     }
     
-    \Stephane888\Debug\debugLog::kintDebugDrupal([
-      'second' => $this->secondOptions,
-      'default' => $default_value,
-      'val' => $this->value,
-      'form_state' => $form_state->getValues(),
-      'form' => $form,
-      'query' => \Drupal::request()->query->all(),
-      'post' => \Drupal::request()->request->all()
-    ], "buildForm_valueForm", true);
-    
+        
     $form['sous_menu'] = [
       '#type' => 'select',
       '#title' => 'Selectionner une sous categorie',
@@ -418,4 +409,3 @@ class lesroidelarenoTag extends InOperator {
   }
   
 }
-

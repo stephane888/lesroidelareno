@@ -63,6 +63,25 @@ function lesroidelareno_inline_entity_form_table_fields_alter(array &$fields, ar
 
 /**
  *
+ * @param array $settings
+ * @param \Drupal\Core\Asset\AttachedAssetsInterface $assets
+ */
+function lesroidelareno_js_settings_alter(array &$settings, \Drupal\Core\Asset\AttachedAssetsInterface $assets) {
+  // dump('');
+}
+
+/**
+ * implement hook_editor_js_settings_alter
+ */
+function lesroidelareno_editor_js_settings_alter(array &$settings) {
+  $link = '/' . drupal_get_path('module', 'lesroidelareno') . '/js/ck-editor.js';
+  foreach ($settings['editor']['formats'] as $k => $value) {
+    $settings['editor']['formats'][$k]['editorSettings']['customConfig'] = $link;
+  }
+}
+
+/**
+ *
  * @param \Drupal\commerce_product\Entity\Product $product
  * @param string $operation
  * @param \Drupal\Core\Session\AccountInterface $account
@@ -423,7 +442,6 @@ function lesroidelareno_entity_field_access($operation, FieldDefinitionInterface
  * Implements hook_views_data_alter().
  */
 function lesroidelareno_views_data_alter(array &$data) {
-  \Stephane888\Debug\debugLog::kintDebugDrupal($data, 'lesroidelareno_views_data_alter', true);
   /**
    * Ajout du filtre de domain pour les produits.
    * on identifie notre filtre avec 'product_field_domain_access'.
@@ -431,7 +449,7 @@ function lesroidelareno_views_data_alter(array &$data) {
    * la requete est cree par 'id'
    */
   if (!empty($data['commerce_product__field_domain_access'])) {
-    // \Stephane888\Debug\debugLog::$max_depth = 7;
+    
     $data['commerce_product__field_domain_access']['product_field_domain_access'] = [
       'title' => t('Current domain'),
       'group' => t('Domain'),
@@ -503,13 +521,6 @@ function lesroidelareno_domain_access(\Drupal\Core\Entity\EntityInterface $entit
 }
 
 function lesroidelareno_query_alter(\Drupal\Core\Database\Query\AlterableInterface $query) {
-  // \Stephane888\Debug\debugLog::kintDebugDrupal($query,
-  // "lesroidelareno_query_alter", true);
-  // if ($query
-  // ->hasTag('micro_limit')) {
-  // $query
-  // ->range(0, 2);
-  // }
 }
 
 /**
@@ -530,8 +541,7 @@ function lesroidelareno_query_entity_reference_alter(\Drupal\mysql\Driver\Databa
    * @var \Drupal\node\Plugin\EntityReferenceSelection\NodeSelection $entity_reference
    */
   $entity_reference = $query->getMetaData('entity_reference_selection_handler');
-  // \Stephane888\Debug\debugLog::kintDebugDrupal($entity_reference->getConfiguration(),
-  // "lesroidelareno_query_entityreference_alter", true);
+  
   $settings = $entity_reference->getConfiguration();
   if (!empty($settings['target_type'])) {
     switch ($settings['target_type']) {
@@ -541,7 +551,8 @@ function lesroidelareno_query_entity_reference_alter(\Drupal\mysql\Driver\Databa
         $query->addField('fda', 'field_domain_access_target_id');
         break;
       default:
-        \Drupal::messenger()->addWarning("Cet filtre doit etre correctement configurer : " . $settings['target_type']);
+        // \Drupal::messenger()->addWarning("Cet filtre doit etre correctement
+        // configurer : " . $settings['target_type']);
         break;
     }
   }
@@ -573,7 +584,7 @@ function lesroidelareno_query_entity_reference_alter(\Drupal\mysql\Driver\Databa
  * @param array $vars
  */
 function lesroidelareno_preprocess_clothingslayoutstitre(&$vars) {
-  if (!empty($vars['settings']['layoutrestrictions']['roles'])) {
+  if (!empty($vars['settings']['layoutrestrictions']['use_roles']) && !empty($vars['settings']['layoutrestrictions']['roles'])) {
     $validRoles = [
       'administrator'
     ];
@@ -610,7 +621,7 @@ function lesroidelareno_preprocess_clothingslayoutstitre(&$vars) {
  * @param array $vars
  */
 function lesroidelareno_preprocess_formatage_models_simple_block(&$vars) {
-  if (!empty($vars['settings']['layoutrestrictions']['roles'])) {
+  if (!empty($vars['settings']['layoutrestrictions']['use_roles']) && !empty($vars['settings']['layoutrestrictions']['roles'])) {
     $validRoles = [
       'administrator'
     ];
