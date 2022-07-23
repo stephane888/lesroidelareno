@@ -90,6 +90,10 @@ function lesroidelareno_commerce_product_variation_access(ProductVariation $prod
   // dump($operation);
 }
 
+/**
+ *
+ * @param array $vars
+ */
 function lesroidelareno_preprocess_views_view__render(&$vars) {
   /**
    *
@@ -116,7 +120,7 @@ function lesroidelareno_preprocess_views_view__render(&$vars) {
   $css = $view->display_handler->getOption('view_form_css');
   if ($css) {
     $Attribute = new Attribute();
-    $css = explode(" ", $css);
+    $css = explode("", $css);
     $Attribute->addClass($css);
     if (!empty($vars['exposed']['#attributes']))
       $vars['exposed']['#attributes']->addClass($css);
