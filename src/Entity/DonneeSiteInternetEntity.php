@@ -110,6 +110,9 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
    */
   public function preSave(EntityStorageInterface $storage) {
     parent::preSave($storage);
+    // On redefinit l'id de l'utilisateur juste avant la premiere sauvegarde.
+    if ($this->isNew())
+      $this->setOwnerId(\Drupal::currentUser()->id());
     // If no revision author has been set explicitly,
     // make the donnee_internet_entity owner the revision author.
     if (!$this->getRevisionUser()) {
