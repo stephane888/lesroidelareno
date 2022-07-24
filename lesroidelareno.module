@@ -25,13 +25,7 @@ use Drupal\user\Entity\User;
  * Implements hook_theme().
  */
 function lesroidelareno_theme() {
-  $hooks['views_view_render'] = [
-    'preprocess functions' => [
-      'template_preprocess_views_view_render'
-    ],
-    'render element' => 'element',
-    'file' => 'lesroidelareno.theme.inc'
-  ];
+  $hooks = [];
   return $hooks;
 }
 
@@ -88,53 +82,6 @@ function lesroidelareno_editor_js_settings_alter(array &$settings) {
  */
 function lesroidelareno_commerce_product_variation_access(ProductVariation $product, $operation, AccountInterface $account) {
   // dump($operation);
-}
-
-/**
- *
- * @param array $vars
- */
-function lesroidelareno_preprocess_views_view__render(&$vars) {
-  /**
-   *
-   * @var \Drupal\views\ViewExecutable $view
-   */
-  $view = $vars['view'];
-  //
-  $css = $view->display_handler->getOption('view_row_css');
-  if ($css) {
-    $Attribute = new Attribute();
-    $css = explode(" ", $css);
-    $Attribute->addClass($css);
-    $vars['rows']['#attributes'] = $Attribute;
-  }
-  //
-  $css = $view->display_handler->getOption('view_header_css');
-  if ($css) {
-    $Attribute = new Attribute();
-    $css = explode(" ", $css);
-    $Attribute->addClass($css);
-    $vars['header']['#attributes'] = $Attribute;
-  }
-  //
-  $css = $view->display_handler->getOption('view_form_css');
-  if ($css) {
-    $Attribute = new Attribute();
-    $css = explode("", $css);
-    $Attribute->addClass($css);
-    if (!empty($vars['exposed']['#attributes']))
-      $vars['exposed']['#attributes']->addClass($css);
-    else
-      $vars['exposed']['#attributes'] = $Attribute;
-  }
-  //
-  $css = $view->display_handler->getOption('view_footer_css');
-  if ($css) {
-    $Attribute = new Attribute();
-    $css = explode(" ", $css);
-    $Attribute->addClass($css);
-    $vars['footer']['#attributes'] = $Attribute;
-  }
 }
 
 /**
