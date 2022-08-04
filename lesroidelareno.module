@@ -1,5 +1,6 @@
 <?php
 use Drupal\commerce_product\Entity\ProductType;
+use Drupal\commerce_product\Entity\Product;
 use Drupal\commerce_product\Entity\ProductVariationType;
 use Drupal\Core\Entity\Display\EntityViewDisplayInterface;
 use Drupal\Core\Entity\EntityInterface;
@@ -76,16 +77,6 @@ function lesroidelareno_editor_js_settings_alter(array &$settings) {
 
 /**
  *
- * @param \Drupal\commerce_product\Entity\Product $product
- * @param string $operation
- * @param \Drupal\Core\Session\AccountInterface $account
- */
-function lesroidelareno_commerce_product_variation_access(ProductVariation $product, $operation, AccountInterface $account) {
-  // dump($operation);
-}
-
-/**
- *
  * @param
  *        $vars
  */
@@ -117,7 +108,8 @@ function lesroidelareno_preprocess_html(&$vars) {
   // }
   //
   // On charge tawk sur les routes non admin.
-  if (!str_contains($routeName, 'system.admin')) {
+  $hidden = false;
+  if (!str_contains($routeName, 'system.admin') && !$hidden) {
     $vars['page']['#attached']['library'][] = 'lesroidelareno/lesroidelareno_tawk.config';
   }
   // On ajoute la class 'container' sur tous les pages de termes taxo.

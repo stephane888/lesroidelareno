@@ -4,3 +4,22 @@ donnee_internet_entity.add:
     _entity_form: 'donnee_internet_entity.default'
   requirements:
     _permission: 'access content'
+    
+lesroidelareno.config_page:
+  path: '/user/{user}/config-page'
+  defaults:
+    _title: 'Config-page'
+    _controller: '\Drupal\lesroidelareno\Controller\LesroidelarenoConfigController::ConfigPage'
+  requirements:
+    _role: 'administrator' 
+    
+lesroidelareno.form_entity:
+  path: '/user/{user}/config-page-2'
+  defaults:
+    _title: 'lesroidelareno.form_entity'
+    _controller: '\Drupal\lesroidelareno\Controller\LesroidelarenoConfigController::ConfigPage2'
+    bundle: null,
+    view_mode: 'default'
+  requirements:
+    _permission: 'access content'
+ 
