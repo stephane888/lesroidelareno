@@ -54,6 +54,13 @@ function lesroidelareno_inline_entity_form_table_fields_alter(array &$fields, ar
       'weight' => 0
     ];
   }
+  elseif ($context['entity_type'] == 'commerce_product') {
+    $fields['product_id'] = [
+      'type' => 'field',
+      'label' => t('ID'),
+      'weight' => 0
+    ];
+  }
 }
 
 /**
