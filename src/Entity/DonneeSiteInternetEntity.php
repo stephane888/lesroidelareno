@@ -2,13 +2,13 @@
 
 namespace Drupal\lesroidelareno\Entity;
 
-use Drupal\Core\Entity\EntityStorageInterface;
-use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\Core\Entity\EditorialContentEntityBase;
-use Drupal\Core\Entity\RevisionableInterface;
 use Drupal\Core\Entity\EntityChangedTrait;
 use Drupal\Core\Entity\EntityPublishedTrait;
+use Drupal\Core\Entity\EntityStorageInterface;
 use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Entity\RevisionableInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
 use Drupal\user\UserInterface;
 use Jawira\CaseConverter\Convert;
 use Stephane888\Debug\Repositories\ConfigDrupal;
@@ -120,13 +120,16 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
     }
   }
   
-  /**
-   *
-   * {@inheritdoc}
-   * @see \Drupal\Core\Entity\ContentEntityBase::postSave()
-   */
-  public function postSave($storage, $update = true) {
+  function postSave(EntityStorageInterface $storage, $update = TRUE) {
     parent::postSave($storage, $update);
+    //
+    $this->saveAnotherDatas();
+  }
+  
+  /**
+   * Enregistre d'autres données.
+   */
+  protected function saveAnotherDatas() {
     $string_nbre = strlen($this->getName());
     // On cree l'entite qui permettra de creer le domaine sur OVH.
     if ($string_nbre >= 3) {
@@ -140,37 +143,49 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
       if (!empty($entities)) {
         $sub_domain .= count($entities) + 1;
       }
-      // On le cree si et seulement si il n'est pas deja crée.
+      // On le cree si et seulement s'il n'est pas deja crée.
       if (empty($this->getDomainOvhEntity())) {
-        try {
-          $conf = ConfigDrupal::config('ovh_api_rest.settings');
-          if (empty($conf['zone_name'])) {
-            /**
-             *
-             * @var \Psr\Log\LoggerInterface $logger
-             */
-            $logger = \Drupal::logger('generate_style_theme');
-            $logger->warning("Le module ovh n'est pas correctement configurer");
-            throw new \LogicException("Le module ovh n'est pas correctement configurer");
-          }
-          $DomainOvh = \Drupal\ovh_api_rest\Entity\DomainOvhEntity::create();
-          $DomainOvh->set('name', ' Generate domain : ' . $this->getName());
-          $DomainOvh->set('zone_name', $conf['zone_name']);
-          $DomainOvh->set('field_type', $conf['field_type']);
-          $DomainOvh->set('sub_domain', $sub_domain);
-          $DomainOvh->set('target', $conf['target']);
-          $DomainOvh->set('path', $conf['path']);
+        $conf = ConfigDrupal::config('ovh_api_rest.settings');
+        if (empty($conf['zone_name'])) {
+          /**
+           *
+           * @var \Psr\Log\LoggerInterface $logger
+           */
+          $logger = \Drupal::logger('generate_style_theme');
+          $logger->warning(" Le module ovh n'est pas correctement configurer ");
+          throw new \LogicException(" Le module ovh n'est pas correctement configurer ");
+        }
+        //
+        
+        //
+        $DomainOvh = \Drupal\ovh_api_rest\Entity\DomainOvhEntity::create();
+        $DomainOvh->set('name', ' Generate domain : ' . $this->getName());
+        $DomainOvh->set('zone_name', $conf['zone_name']);
+        $DomainOvh->set('field_type', $conf['field_type']);
+        // $DomainOvh->set('sub_domain', $sub_domain);
+        $DomainOvh->setSubDomain($sub_domain);
+        $DomainOvh->set('target', $conf['target']);
+        $DomainOvh->set('path', $conf['path']);
+        // On cree le domain.
+        $domain = \Drupal\vuejs_entity\VuejsEntity::createDomainFromData($sub_domain);
+        if ($domain) {
+          $domain->id();
+          $DomainOvh->set('domain_id_drupal', $domain->id());
           $DomainOvh->save();
           //
           if ($DomainOvh->id()) {
             $this->setDomainOvhEntity($DomainOvh->id());
             $this->save();
           }
+          else
+            throw new \Exception(" Impossible de creer ou de recuperer le DomainOvhEntity. ");
         }
-        catch (\Exception $e) {
-          //
-        }
+        else
+          throw new \Exception(" Impossible de creer ou de recuperer le domain. ");
       }
+    }
+    else {
+      throw new \Exception(" Nombre de caractaire inssuffisant ");
     }
   }
   
