@@ -138,10 +138,26 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
       $sub_domain = preg_replace('/[^a-z0-9\-]/', "", $sub_domain);
       // Verifie si le nom de domaine existe deja.
       $query = $this->entityTypeManager()->getStorage('domain_ovh_entity')->getQuery();
-      $query->condition('sub_domain', "%" . $sub_domain . "%", 'LIKE');
+      $query->condition('sub_domain', $sub_domain . "%", 'LIKE');
       $entities = $query->execute();
       if (!empty($entities)) {
-        $sub_domain .= count($entities) + 1;
+        // cette regle ne permet pas de garantir l'unicité des valeurs du
+        // champs.
+        // $sub_domain .= count($entities) + 1;
+
+        /**
+         * Example : un cas de figure ou on a en bd :
+         * - test2
+         * - test3
+         * Si l'utilisateur saisie test, le resultat va etre "test3".( bug ).
+         */
+        //
+        $query = $this->entityTypeManager()->getStorage('domain_ovh_entity')->getQuery();
+        $query->sort('id', 'DESC');
+        $query->range(0, 1);
+        $ids = $query->execute();
+        $id = reset($ids) + 1;
+        $sub_domain .= $id;
       }
       // On le cree si et seulement s'il n'est pas deja crée.
       if (empty($this->getDomainOvhEntity())) {
