@@ -7,7 +7,6 @@ use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Template\Attribute;
 use Drupal\block_content\Entity\BlockContent;
-use Drupal\domain_access\DomainAccessManagerInterface;
 use Drupal\file\Entity\File;
 use Drupal\user\Entity\User;
 use Drupal\views\ViewExecutable;
@@ -393,79 +392,6 @@ function lesroidelareno_entity_field_access($operation, FieldDefinitionInterface
   }
   // dump($field_definition->getName());
   return AccessResult::neutral();
-}
-
-/**
- * Implements hook_views_data_alter().
- */
-function lesroidelareno_views_data_alter(array &$data) {
-  /**
-   * Ajout du filtre de domain pour les produits.
-   * on identifie notre filtre avec 'product_field_domain_access'.
-   * la colonne est definie : 'field'
-   * la requete est cree par 'id'
-   */
-  if (!empty($data['commerce_product__field_domain_access'])) {
-
-    $data['commerce_product__field_domain_access']['product_field_domain_access'] = [
-      'title' => t('Current domain'),
-      'group' => t('Domain'),
-      'filter' => [
-        'field' => DomainAccessManagerInterface::DOMAIN_ACCESS_FIELD . '_target_id',
-        'id' => 'lesroidelareno_domain_filter',
-        'title' => t('Available on current domain'),
-        'help' => t('Filters out nodes available on current domain ( published to current domain or all affiliates ).')
-      ]
-    ];
-  }
-
-  /**
-   * Ajoute le filtre dans les resulats de recherches de search control.
-   */
-  if (!empty($data['search_api_index_produits']['field_domain_access'])) {
-    $data['search_api_index_produits']['product_field_domain_access'] = [
-      'title' => t('Current domain'),
-      'group' => t('Domain'),
-      'filter' => [
-        'field' => DomainAccessManagerInterface::DOMAIN_ACCESS_FIELD,
-        'id' => 'lesroidelareno_domain_filter',
-        'title' => t('Available on current domain'),
-        'help' => t('Filters out nodes available on current domain ( published to current domain or all affiliates ).')
-      ]
-    ];
-  }
-
-  /**
-   * On ajoute le filtre pour les blocs personnalisé.
-   */
-  if (!empty($data['block_content__field_domain_access'])) {
-    $data['block_content__field_domain_access']['product_field_domain_access'] = [
-      'title' => t('Current domain'),
-      'group' => t('Domain'),
-      'filter' => [
-        'field' => DomainAccessManagerInterface::DOMAIN_ACCESS_FIELD . '_target_id',
-        'id' => 'lesroidelareno_domain_filter',
-        'title' => t(' Available on current domain '),
-        'help' => t(' Filters out nodes available on current domain ( published to current domain or all affiliates ). ')
-      ]
-    ];
-  }
-
-  /**
-   * On ajoute le filtre pour filtrer les differents modeles de themes.
-   */
-  if ($data['site_type_datas__terms']) {
-    $data['site_type_datas__terms']['filter_theme_model'] = [
-      'title' => t('Filtre de theme'),
-      'group' => t('Filtre de theme'),
-      'filter' => [
-        'field' => 'terms_target_id',
-        'id' => 'lesroidelareno_tag_filter',
-        'title' => t(' Filtre de theme '),
-        'help' => t(" Permet de filtrer les themes en function de l'id du terme taxonomie ")
-      ]
-    ];
-  }
 }
 
 /**
