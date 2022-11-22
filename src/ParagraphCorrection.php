@@ -26,6 +26,7 @@ class ParagraphCorrection {
      */
     foreach ($entities as $entity_type_id) {
       $table = $entity_type_id . '_layout_paragraphs';
+      $results = [];
       /**
        *
        * @var \Drupal\Core\Database\Connection $dateBase
@@ -34,9 +35,9 @@ class ParagraphCorrection {
       if ($dateBase->schema()->tableExists($table)) {
         $query = $dateBase->select($table, 'n');
         $query->condition('bundle', $paragraph_type_id);
-        $results = $query->execute();
-        dd($results);
+        $results[] = $query->execute();
       }
+      return $results;
     }
   }
 
