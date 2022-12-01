@@ -32,7 +32,7 @@ function lesroidelareno_theme() {
  *        operating.
  *        - entity_type: The type of the referenced entities.
  *        - allowed_bundles: Bundles allowed on the reference field.
- *
+ *        
  * @see \Drupal\inline_entity_form\InlineFormInterface::getTableFields()
  */
 function lesroidelareno_inline_entity_form_table_fields_alter(array &$fields, array $context) {
@@ -62,6 +62,12 @@ function lesroidelareno_inline_entity_form_table_fields_alter(array &$fields, ar
       'type' => 'field',
       'label' => t('ID'),
       'weight' => 0
+    ];
+    $fields['callback_layout_url'] = [
+      'type' => 'callback',
+      'label' => t('URL'),
+      'callback' => '\Drupal\wb_horizon_public\WbHorizonPublic::getRouteToedit',
+      'weight' => 10
     ];
   }
 }
@@ -122,7 +128,7 @@ function lesroidelareno_preprocess_html(&$vars) {
   // On charge tawk sur les routes non admin.
   $hidden = false;
   $idUser = \Drupal::currentUser()->id();
-
+  
   //
   if (!str_contains($routeName, 'system.admin') && !$hidden && $idUser != 1) {
     $vars['page']['#attached']['library'][] = 'lesroidelareno/lesroidelareno_tawk.config';
@@ -145,7 +151,7 @@ function lesroidelareno_preprocess_html(&$vars) {
 }
 
 function lesroidelareno_preprocess_facets_result_item__checkbox(&$vars) {
-
+  
   // if (!empty($vars['items'])) {
   // foreach ($vars['items'] as $k => $item) {
   // $vars['items'][$k]['value']['#title']['icone'] = [
@@ -231,7 +237,7 @@ function lesroidelareno_preprocess_pager(array &$variables) {
         }
       }
     }
-
+    
     /**
      * On recrit les url pour les cas ou ces derniers contientienne target_id.
      */
@@ -304,7 +310,7 @@ function lesroidelareno_views_pre_build(ViewExecutable $view) {
           $args[] = $val['value'];
         }
       }
-
+      
       $view->setArguments($args);
     }
     //
@@ -384,7 +390,7 @@ function lesroidelareno_entity_field_access($operation, FieldDefinitionInterface
     'is_default_theme',
     'path'
   ];
-
+  
   if (in_array($field_definition->getName(), $disabledFields)) {
     if (in_array('administrator', $account->getRoles())) {
       return AccessResult::allowed();
@@ -417,19 +423,19 @@ function lesroidelareno_query_alter(\Drupal\Core\Database\Query\AlterableInterfa
  * @param \Drupal\Core\Database\Query\AlterableInterface $query
  */
 function lesroidelareno_query_entity_reference_alter(\Drupal\mysql\Driver\Database\mysql\Select $query) {
-
+  
   /**
    *
    * @var \Drupal\domain\DomainNegotiator $domain
    */
   $domain = \Drupal::service('domain.negotiator');
-
+  
   /**
    *
    * @var \Drupal\node\Plugin\EntityReferenceSelection\NodeSelection $entity_reference
    */
   $entity_reference = $query->getMetaData('entity_reference_selection_handler');
-
+  
   $settings = $entity_reference->getConfiguration();
   if (!empty($settings['target_type'])) {
     switch ($settings['target_type']) {
@@ -444,23 +450,23 @@ function lesroidelareno_query_entity_reference_alter(\Drupal\mysql\Driver\Databa
         break;
     }
   }
-
+  
   // $field = $query->getMetadata('field');
   // if ($field['field_name'] != 'field_foo') {
   // // This is not the field we want to alter.
   // return;
   // }
-
+  
   // // Get the base table.
   // $tables = $query->getTables();
   // $base_table = key($tables);
-
+  
   // // Join to the new table.
   // $field_bar = field_info_field('field_drawer_type');
   // $table_name = _field_sql_storage_tablename($field_bar);
   // $query->innerJoin($table_name, 'drawer_type', '%alias.entity_id = ' .
   // $base_table . '.tid');
-
+  
   // // Add conditions.
   // $query->condition('drawer_type.field_bar_value', 'baz', '=');
 }
