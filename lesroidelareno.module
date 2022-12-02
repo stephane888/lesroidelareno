@@ -49,6 +49,12 @@ function lesroidelareno_inline_entity_form_table_fields_alter(array &$fields, ar
       'label' => t('ID'),
       'weight' => 0
     ];
+    $fields['callback_layout_url'] = [
+      'type' => 'callback',
+      'label' => t('Variations du produit'),
+      'callback' => '\Drupal\lesroidelareno\lesroidelareno::getRouteVariations',
+      'weight' => 10
+    ];
   }
   elseif ($context['entity_type'] == 'block_content') {
     $fields['id'] = [
@@ -62,12 +68,6 @@ function lesroidelareno_inline_entity_form_table_fields_alter(array &$fields, ar
       'type' => 'field',
       'label' => t('ID'),
       'weight' => 0
-    ];
-    $fields['callback_layout_url'] = [
-      'type' => 'callback',
-      'label' => t('URL'),
-      'callback' => '\Drupal\wb_horizon_public\WbHorizonPublic::getRouteToedit',
-      'weight' => 10
     ];
   }
 }
