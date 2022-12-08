@@ -438,6 +438,8 @@ function lesroidelareno_query_entity_reference_alter(\Drupal\mysql\Driver\Databa
   
   $settings = $entity_reference->getConfiguration();
   if (!empty($settings['target_type'])) {
+    // il faudra ajouter manuelement les entites qui varient en function du
+    // domaine.
     switch ($settings['target_type']) {
       case 'node':
         $query->addJoin('INNER', 'node__field_domain_access', 'fda', 'fda.entity_id=base_table.nid');
