@@ -22,14 +22,14 @@ class lesroidelareno {
       $nbre = count($Product->getVariationIds());
       $error = false;
       if ($nbre)
-        $nbre = $nbre . ' variations';
+        $nbre = 'Editer ( ' . $nbre . ' variations )';
       else {
-        $nbre = ' aucune variation';
+        $nbre = 'Ajouter une variation ( ne serra pas affichage, ni dupliqué )';
         $error = true;
       }
       $link = [
         '#type' => 'link',
-        '#title' => 'Editer : ' . $nbre,
+        '#title' => $nbre,
         '#url' => Url::fromRoute("entity.commerce_product_variation.collection", [
           'commerce_product' => $Product->id()
         ]),
@@ -37,7 +37,8 @@ class lesroidelareno {
           'attributes' => [
             'target' => '_blank',
             'class' => [],
-            'style' => $error ? 'color:#f00;' : ''
+            'style' => $error ? 'color:#f00;' : '',
+            'title' => $error ? ' Vous devez ajouter au moins une variation pour que votre produit soit valide ' : ' Votre produit est valide '
           ]
         ]
       ];
