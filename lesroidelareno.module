@@ -83,6 +83,23 @@ function lesroidelareno_inline_entity_form_table_fields_alter(array &$fields, ar
       'weight' => 0
     ];
   }
+  elseif ($context['entity_type'] == 'blocks_contents') {
+    $fields['id'] = [
+      'type' => 'field',
+      'label' => t('ID'),
+      'weight' => 0
+    ];
+    $fields[\Drupal\domain_access\DomainAccessManagerInterface::DOMAIN_ACCESS_FIELD] = [
+      'type' => 'field',
+      'label' => 'Domain access',
+      'weight' => 0
+    ];
+    $fields['type'] = [
+      'type' => 'field',
+      'label' => 'Type',
+      'weight' => 0
+    ];
+  }
   elseif ($context['entity_type'] == 'paragraph') {
     $fields['id'] = [
       'type' => 'field',
