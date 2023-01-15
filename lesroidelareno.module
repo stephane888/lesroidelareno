@@ -192,8 +192,46 @@ function lesroidelareno_preprocess_html(&$vars) {
   }
 }
 
+/**
+ */
+function lesroidelareno_preprocess_views_view_unformatted(&$vars) {
+  // Liste d'entité qu'on peut editer avec e crayon.
+  $entities = [
+    '#paragraph',
+    '#node',
+    '#blocks_contents',
+    '#block_content',
+    '#commerce_product',
+    '#site_type_datas',
+    '#site_internet_entity'
+  ];
+  if (!empty($vars['rows'])) {
+    foreach ($vars['rows'] as &$row) {
+      foreach ($entities as $keyEntity) {
+        if (!empty($row['content'][$keyEntity])) {
+          if (empty($row['attributes'])) {
+            $row['attributes'] = new \Drupal\Core\Template\Attribute();
+          }
+          /**
+           *
+           * @var \Drupal\Core\Template\Attribute $attribute
+           */
+          $attribute = $row['attributes'];
+          $attribute->addClass('contextual-region');
+          $row['content']['formatage_models_quickly_edit'] = [
+            '#theme' => 'formatage_models_quickly_edit',
+            '#entity' => $row['content'][$keyEntity]
+          ];
+          break;
+        }
+      }
+    }
+  }
+}
+
+/**
+ */
 function lesroidelareno_preprocess_facets_result_item__checkbox(&$vars) {
-  
   // if (!empty($vars['items'])) {
   // foreach ($vars['items'] as $k => $item) {
   // $vars['items'][$k]['value']['#title']['icone'] = [
@@ -598,6 +636,33 @@ function lesroidelareno_form_alter(&$form, FormStateInterface $form_state, $form
     $form['domain']['#access'] = false;
   }
   // dump($form);
+}
+
+function lesroidelareno_entity_view_alter(array &$build, \Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display) {
+  if ($build['#view_mode'] == 'full') {
+    // dump($build);
+    // On charge l'outil d'edition via le custom bouton.
+    $entities = [
+      'commerce_product',
+      'node',
+      'blocks_contents',
+      'paragraph',
+      'block_content',
+      'commerce_product'
+    ];
+    //
+    if (!empty($build['#entity_type']))
+      if (in_array($build['#entity_type'], $entities)) {
+        // dump($build);
+        $build['formatage_models_quickly_edit'] = [
+          '#theme' => 'formatage_models_quickly_edit',
+          '#entity' => \Drupal::routeMatch()->getParameter($build['#entity_type'])
+        ];
+      }
+    // else {
+    // dump($build);
+    // }
+  }
 }
 
 // /**
