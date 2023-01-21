@@ -1,3 +1,8 @@
+lesroidelareno_pagination:
+  css:
+    component:
+      css/lesroidelareno-pagination.css: {}
+
 # Custom module library for general purposes.
 lesroidelareno_admin:
   js:

@@ -1,0 +1,8 @@
+.pagination-round {
+  padding: 1rem 8rem !important;
+  border-radius: 30px !important;  
+}
+.pagination-round .page-link {
+    border-radius: 25px !important;
+    margin-right: 2rem;
+  }

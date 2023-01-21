@@ -195,38 +195,80 @@ function lesroidelareno_preprocess_html(&$vars) {
 /**
  */
 function lesroidelareno_preprocess_views_view_unformatted(&$vars) {
-  // Liste d'entité qu'on peut editer avec e crayon.
-  $entities = [
-    '#paragraph',
-    '#node',
-    '#blocks_contents',
-    '#block_content',
-    '#commerce_product',
-    '#site_type_datas',
-    '#site_internet_entity'
-  ];
-  if (!empty($vars['rows'])) {
-    foreach ($vars['rows'] as &$row) {
-      foreach ($entities as $keyEntity) {
-        if (!empty($row['content'][$keyEntity])) {
-          if (empty($row['attributes'])) {
-            $row['attributes'] = new \Drupal\Core\Template\Attribute();
+  if (\Drupal::currentUser()->id()) {
+    // Liste d'entité qu'on peut editer avec e crayon.
+    $entities = [
+      '#paragraph',
+      '#node',
+      '#blocks_contents',
+      '#block_content',
+      '#commerce_product',
+      '#site_type_datas',
+      '#site_internet_entity'
+    ];
+    if (!empty($vars['rows'])) {
+      foreach ($vars['rows'] as &$row) {
+        foreach ($entities as $keyEntity) {
+          if (!empty($row['content'][$keyEntity])) {
+            if (empty($row['attributes'])) {
+              $row['attributes'] = new \Drupal\Core\Template\Attribute();
+            }
+            /**
+             *
+             * @var \Drupal\Core\Template\Attribute $attribute
+             */
+            $attribute = $row['attributes'];
+            $attribute->addClass('contextual-region');
+            $row['content']['formatage_models_quickly_edit'] = [
+              '#theme' => 'formatage_models_quickly_edit',
+              '#entity' => $row['content'][$keyEntity]
+            ];
+            break;
           }
-          /**
-           *
-           * @var \Drupal\Core\Template\Attribute $attribute
-           */
-          $attribute = $row['attributes'];
-          $attribute->addClass('contextual-region');
-          $row['content']['formatage_models_quickly_edit'] = [
-            '#theme' => 'formatage_models_quickly_edit',
-            '#entity' => $row['content'][$keyEntity]
-          ];
-          break;
         }
       }
     }
   }
+}
+
+function lesroidelareno_preprocess_owlcarousel_views(&$vars) {
+  if (\Drupal::currentUser()->id()) {
+    // Liste d'entité qu'on peut editer avec e crayon.
+    $entities = [
+      '#paragraph',
+      '#node',
+      '#blocks_contents',
+      '#block_content',
+      '#commerce_product',
+      '#site_type_datas',
+      '#site_internet_entity'
+    ];
+    if (!empty($vars['rows'])) {
+      foreach ($vars['rows'] as &$row) {
+        foreach ($entities as $keyEntity) {
+          if (!empty($row[$keyEntity])) {
+            if (empty($row['attributes'])) {
+              $row['attributes'] = new \Drupal\Core\Template\Attribute();
+            }
+            /**
+             *
+             * @var \Drupal\Core\Template\Attribute $attribute
+             */
+            $attribute = $row['attributes'];
+            $attribute->addClass('contextual-region');
+            $row['formatage_models_quickly_edit'] = [
+              '#theme' => 'formatage_models_quickly_edit',
+              '#entity' => $row[$keyEntity]
+            ];
+            break;
+          }
+        }
+      }
+    }
+  }
+}
+
+function _lesroidelareno_add_edit_button(&$vars) {
 }
 
 /**
@@ -359,6 +401,15 @@ function lesroidelareno_preprocess_pager(array &$variables) {
       $variables['items']['last']['href'] = Url::fromRoute($route_name, $route_parameters, $options)->toString();
     }
   }
+  $attributes = new \Drupal\Core\Template\Attribute();
+  $attributes->addClass([
+    "pagination-lg",
+    'bg-light',
+    'pagination-round'
+  ]);
+  $variables['attributes'] = $attributes;
+  $variables['#attached']['library'][] = 'lesroidelareno/lesroidelareno_pagination';
+  // dump($variables);
 }
 
 /**
