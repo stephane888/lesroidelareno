@@ -405,7 +405,8 @@ function lesroidelareno_preprocess_pager(array &$variables) {
   $attributes->addClass([
     "pagination-lg",
     'bg-light',
-    'pagination-round'
+    'pagination-round',
+    'flex-wrap'
   ]);
   $variables['attributes'] = $attributes;
   $variables['#attached']['library'][] = 'lesroidelareno/lesroidelareno_pagination';
