@@ -543,7 +543,11 @@ function lesroidelareno_domain_access(\Drupal\Core\Entity\EntityInterface $entit
   }
 }
 
-function lesroidelareno_query_alter(\Drupal\mysql\Driver\Database\mysql\Select $query) {
+/**
+ *
+ * @param \Drupal\mysql\Driver\Database\mysql\Select $query
+ */
+function lesroidelareno_query_alter(\Drupal\Core\Database\Query\AlterableInterface $query) {
   /**
    *
    * @var \Drupal\domain\DomainNegotiator $domain
