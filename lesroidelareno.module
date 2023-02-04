@@ -491,16 +491,6 @@ function _lesroidelareno_get_product_theme(Drupal\commerce_product\Entity\Produc
 }
 
 /**
- * implement hook_ENTITY_TYPE_access
- */
-function lesroidelareno_block_content_access(BlockContent $entity, $operation, AccountInterface $account) {
-  if ($operation == 'update') {
-    if ($entity->get('user_id')->target_id == $account->id())
-      return AccessResult::allowed();
-  }
-}
-
-/**
  * Implements hook_entity_field_access().
  */
 function lesroidelareno_entity_field_access($operation, FieldDefinitionInterface $field_definition, AccountInterface $account, FieldItemListInterface $items = NULL) {
@@ -520,14 +510,17 @@ function lesroidelareno_entity_field_access($operation, FieldDefinitionInterface
     'field_domain_source',
     'is_home_page',
     'is_default_theme',
-    'path'
+    'path',
+    'field_formulaire'
   ];
   
+  $roles = $account->getRoles();
+  
   if (in_array($field_definition->getName(), $disabledFields)) {
-    if (in_array('administrator', $account->getRoles())) {
+    if (in_array('administrator', $roles)) {
       return AccessResult::allowed();
     }
-    else
+    elseif ($operation != 'view')
       return AccessResult::forbidden();
   }
   // dump($field_definition->getName());
