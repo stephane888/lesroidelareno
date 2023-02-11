@@ -10,6 +10,7 @@ use Drupal\block_content\Entity\BlockContent;
 use Drupal\file\Entity\File;
 use Drupal\user\Entity\User;
 use Drupal\views\ViewExecutable;
+use Drupal\language\Entity\ContentLanguageSettings;
 
 /**
  * Implements hook_theme().
@@ -36,6 +37,7 @@ function lesroidelareno_theme() {
  * @see \Drupal\inline_entity_form\InlineFormInterface::getTableFields()
  */
 function lesroidelareno_inline_entity_form_table_fields_alter(array &$fields, array $context) {
+  // dump($context);
   if ($context['entity_type'] == 'node') {
     $fields['nid'] = [
       'type' => 'field',
@@ -46,6 +48,17 @@ function lesroidelareno_inline_entity_form_table_fields_alter(array &$fields, ar
       'type' => 'field',
       'label' => 'Domain access',
       'weight' => 0
+    ];
+    $fields['type'] = [
+      'type' => 'field',
+      'label' => 'Type',
+      'weight' => 0
+    ];
+    $fields['callback_layout_url'] = [
+      'type' => 'callback',
+      'label' => t('edition externe'),
+      'callback' => '\Drupal\lesroidelareno\lesroidelareno::manageNode',
+      'weight' => 10
     ];
   }
   elseif ($context['entity_type'] == 'commerce_product') {
@@ -99,6 +112,12 @@ function lesroidelareno_inline_entity_form_table_fields_alter(array &$fields, ar
       'label' => 'Type',
       'weight' => 0
     ];
+    $fields['callback_layout_url'] = [
+      'type' => 'callback',
+      'label' => t('Edition externe'),
+      'callback' => '\Drupal\lesroidelareno\lesroidelareno::manageBlocksContents',
+      'weight' => 10
+    ];
   }
   elseif ($context['entity_type'] == 'paragraph') {
     $fields['id'] = [
@@ -141,7 +160,6 @@ function lesroidelareno_editor_js_settings_alter(array &$settings) {
 function lesroidelareno_preprocess_html(&$vars) {
   $routeName = \Drupal::routeMatch()->getRouteName();
   // $parameters = \Drupal::routeMatch()->getParameters()->all();
-  // dump($routeName);
   // $parameters = \Drupal::routeMatch()->getParameters()->all();
   // if (!empty($parameters['content_generate_entity'])) {
   // /**
@@ -196,7 +214,7 @@ function lesroidelareno_preprocess_html(&$vars) {
  */
 function lesroidelareno_preprocess_views_view_unformatted(&$vars) {
   if (\Drupal::currentUser()->id()) {
-    // Liste d'entité qu'on peut editer avec e crayon.
+    // Liste d'entité qu'on peut editer avec le crayon.
     $entities = [
       '#paragraph',
       '#node',
@@ -511,7 +529,9 @@ function lesroidelareno_entity_field_access($operation, FieldDefinitionInterface
     'is_home_page',
     'is_default_theme',
     'path',
-    'field_formulaire'
+    'field_formulaire',
+    'revision_log',
+    'langcode'
   ];
   
   $roles = $account->getRoles();
@@ -698,7 +718,17 @@ function lesroidelareno_form_alter(&$form, FormStateInterface $form_state, $form
   if (isset($form['domain']) && !\Drupal::currentUser()->hasPermission('administer site configuration')) {
     $form['domain']['#access'] = false;
   }
-  // dump($form);
+  // hook_form_FORM_ID_alter
+}
+
+/**
+ * Permet d'ajouter la configuration des langues sur chaque paragraphes.
+ *
+ * @param array $form
+ * @param \Drupal\Core\Form\FormStateInterface $form_state
+ * @param int $form_id
+ */
+function lesroidelareno_form_paragraphs_type_edit_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
 }
 
 function lesroidelareno_entity_view_alter(array &$build, \Drupal\Core\Entity\EntityInterface $entity, \Drupal\Core\Entity\Display\EntityViewDisplayInterface $display) {
