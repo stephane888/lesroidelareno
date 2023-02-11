@@ -22,36 +22,38 @@ class lesroidelareno {
    * @param BlocksContents $BlocksContents
    */
   static public function manageBlocksContents(BlocksContents $BlocksContents) {
-    $link = [
-      '#type' => 'dropbutton',
-      '#dropbutton_type' => 'small',
-      '#links' => [
-        'simple_form' => [
-          'title' => t('Editer'),
-          'url' => Url::fromRoute('entity.node.edit_form', [
-            'node' => $BlocksContents->id()
-          ]),
-          '#options' => [
-            'attributes' => [
-              'target' => '_blank',
-              'class' => []
+    $link = '';
+    if (!empty($BlocksContents->id()))
+      $link = [
+        '#type' => 'dropbutton',
+        '#dropbutton_type' => 'small',
+        '#links' => [
+          'simple_form' => [
+            'title' => t('Editer'),
+            'url' => Url::fromRoute('entity.node.edit_form', [
+              'node' => $BlocksContents->id()
+            ]),
+            '#options' => [
+              'attributes' => [
+                'target' => '_blank',
+                'class' => []
+              ]
             ]
-          ]
-        ],
-        'demo' => [
-          'title' => t('Traduction'),
-          'url' => Url::fromRoute('entity.node.content_translation_overview', [
-            'node' => $BlocksContents->id()
-          ]),
-          '#options' => [
-            'attributes' => [
-              'target' => '_blank',
-              'class' => []
+          ],
+          'demo' => [
+            'title' => t('Traduction'),
+            'url' => Url::fromRoute('entity.node.content_translation_overview', [
+              'node' => $BlocksContents->id()
+            ]),
+            '#options' => [
+              'attributes' => [
+                'target' => '_blank',
+                'class' => []
+              ]
             ]
           ]
         ]
-      ]
-    ];
+      ];
     return $link;
   }
   
@@ -61,36 +63,38 @@ class lesroidelareno {
    * @return string[]
    */
   static public function manageNode(Node $node) {
-    $link = [
-      '#type' => 'dropbutton',
-      '#dropbutton_type' => 'small',
-      '#links' => [
-        'simple_form' => [
-          'title' => t('Editer'),
-          'url' => Url::fromRoute('entity.node.edit_form', [
-            'node' => $node->id()
-          ]),
-          '#options' => [
-            'attributes' => [
-              'target' => '_blank',
-              'class' => []
+    $link = '';
+    if (!empty($node->id()))
+      $link = [
+        '#type' => 'dropbutton',
+        '#dropbutton_type' => 'small',
+        '#links' => [
+          'simple_form' => [
+            'title' => t('Editer'),
+            'url' => Url::fromRoute('entity.node.edit_form', [
+              'node' => $node->id()
+            ]),
+            '#options' => [
+              'attributes' => [
+                'target' => '_blank',
+                'class' => []
+              ]
             ]
-          ]
-        ],
-        'demo' => [
-          'title' => t('Traduction'),
-          'url' => Url::fromRoute('entity.node.content_translation_overview', [
-            'node' => $node->id()
-          ]),
-          '#options' => [
-            'attributes' => [
-              'target' => '_blank',
-              'class' => []
+          ],
+          'demo' => [
+            'title' => t('Traduction'),
+            'url' => Url::fromRoute('entity.node.content_translation_overview', [
+              'node' => $node->id()
+            ]),
+            '#options' => [
+              'attributes' => [
+                'target' => '_blank',
+                'class' => []
+              ]
             ]
           ]
         ]
-      ]
-    ];
+      ];
     return $link;
   }
   
