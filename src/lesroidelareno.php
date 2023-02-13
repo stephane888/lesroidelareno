@@ -30,8 +30,8 @@ class lesroidelareno {
         '#links' => [
           'simple_form' => [
             'title' => t('Editer'),
-            'url' => Url::fromRoute('entity.node.edit_form', [
-              'node' => $BlocksContents->id()
+            'url' => Url::fromRoute('entity.blocks_contents.edit_form', [
+              'blocks_contents' => $BlocksContents->id()
             ]),
             '#options' => [
               'attributes' => [
@@ -42,8 +42,8 @@ class lesroidelareno {
           ],
           'demo' => [
             'title' => t('Traduction'),
-            'url' => Url::fromRoute('entity.node.content_translation_overview', [
-              'node' => $BlocksContents->id()
+            'url' => Url::fromRoute('entity.blocks_contents.content_translation_overview', [
+              'blocks_contents' => $BlocksContents->id()
             ]),
             '#options' => [
               'attributes' => [
