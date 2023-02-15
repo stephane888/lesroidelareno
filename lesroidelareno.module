@@ -613,18 +613,22 @@ function lesroidelareno_query_entity_reference_alter(\Drupal\mysql\Driver\Databa
         $query->addJoin('INNER', 'commerce_product__field_domain_access', 'fda', 'fda.entity_id=base_table.product_id');
         $query->condition('fda.field_domain_access_target_id', $domain->getActiveId());
         $query->addField('fda', 'field_domain_access_target_id');
+        break;
       case 'blocks_contents':
         $query->addJoin('INNER', 'blocks_contents__field_domain_access', 'fda', 'fda.entity_id=base_table.id');
         $query->condition('fda.field_domain_access_target_id', $domain->getActiveId());
         $query->addField('fda', 'field_domain_access_target_id');
+        break;
       case 'site_internet_entity':
         $query->addJoin('INNER', 'site_internet_entity__field_domain_access', 'fda', 'fda.entity_id=base_table.id');
         $query->condition('fda.field_domain_access_target_id', $domain->getActiveId());
         $query->addField('fda', 'field_domain_access_target_id');
+        break;
       case 'block_content':
         $query->addJoin('INNER', 'block_content__field_domain_access', 'fda', 'fda.entity_id=base_table.id');
         $query->condition('fda.field_domain_access_target_id', $domain->getActiveId());
         $query->addField('fda', 'field_domain_access_target_id');
+        break;
       default:
         \Drupal::messenger()->addWarning(" Cet filtre doit etre correctement configurer : " . $settings['target_type']);
         break;
