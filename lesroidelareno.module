@@ -596,6 +596,9 @@ function lesroidelareno_query_entity_reference_alter(\Drupal\mysql\Driver\Databa
         $query->condition('fda.field_domain_access_target_id', $domain->getActiveId());
         $query->addField('fda', 'field_domain_access_target_id');
         break;
+      // on doit également ajouté le fitre pour les elements suivants :
+      // commerce_payment, commerce_payment_method, commerce_order,
+      // commerce_order_item.
       case 'site_type_datas':
       case 'taxonomy_term':
       case 'user':
@@ -626,43 +629,6 @@ function lesroidelareno_query_entity_reference_alter(\Drupal\mysql\Driver\Databa
   
   // // Add conditions.
   // $query->condition('drawer_type.field_bar_value', 'baz', '=');
-}
-
-/**
- * --forcing
- *
- * @deprecated
- * @param array $vars
- */
-function lesroidelareno_preprocess_clothingslayoutstitre(&$vars) {
-  if (!empty($vars['settings']['layoutrestrictions']['use_roles']) && !empty($vars['settings']['layoutrestrictions']['roles'])) {
-    $validRoles = [
-      'administrator'
-    ];
-    /**
-     *
-     * @var User $user
-     */
-    $user = User::load(\Drupal::currentUser()->id());
-    $currentRoles = $user->getRoles();
-    foreach ($vars['settings']['layoutrestrictions']['roles'] as $value) {
-      if ($value)
-        $validRoles[] = $value;
-    }
-    //
-    if (!empty($validRoles)) {
-      $access = false;
-      foreach ($validRoles as $role) {
-        if (in_array($role, $currentRoles)) {
-          $access = true;
-          break;
-        }
-      }
-      if (!$access) {
-        $vars['content'] = [];
-      }
-    }
-  }
 }
 
 /**
