@@ -1,0 +1,7 @@
+lesroidelareno.clean_configs:
+  path: '/admin/config/development/lesroidelareno/clean-config/{theme_name}'
+  defaults:
+    _title: 'Clean config for a theme'
+    _form: '\Drupal\lesroidelareno\Form\CleanConfigThemesAndEntitiesForm'
+  requirements:
+    _role: 'administrator'

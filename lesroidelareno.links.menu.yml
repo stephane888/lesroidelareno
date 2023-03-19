@@ -11,3 +11,4 @@ donnee_internet_entity.admin.structure.settings:
   description: "Configure Donnee site internet des utilisateurs entities"
   route_name: donnee_internet_entity.settings
   parent: system.admin_structure
+
