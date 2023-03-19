@@ -109,10 +109,9 @@ class CleanConfigThemesAndEntitiesForm extends FormBase {
             '#title' => $node->id(),
             '#default_value' => $node->label(),
             '#attributes' => [
-              // 'read-only' => true,
-              'readonly' => true,
-              'maxlength' => 255
-            ]
+              'readonly' => true
+            ],
+            '#maxlength' => 255
           ];
         }
       }
@@ -144,10 +143,9 @@ class CleanConfigThemesAndEntitiesForm extends FormBase {
             '#title' => $block->id(),
             '#default_value' => $block->label(),
             '#attributes' => [
-              // 'read-only' => true,
-              'readonly' => true,
-              'maxlength' => 255
-            ]
+              'readonly' => true
+            ],
+            '#maxlength' => 255
           ];
         }
       }
@@ -166,10 +164,9 @@ class CleanConfigThemesAndEntitiesForm extends FormBase {
           '#type' => 'textfield',
           '#default_value' => $confs['name'],
           '#attributes' => [
-            // 'read-only' => true,
-            'readonly' => true,
-            'maxlength' => 255
-          ]
+            'readonly' => true
+          ],
+          '#maxlength' => 255
         ];
       }
       //
