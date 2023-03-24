@@ -306,6 +306,8 @@ class CleanConfigThemesAndEntitiesForm extends FormBase {
   }
   
   /**
+   * Dans la pratique on n'a rarement besoin de supprimer via la seconde
+   * approche , la premiere (DeleteEntities) la fait deja via des dependance.
    *
    * @param array $form
    * @param FormStateInterface $form_state
