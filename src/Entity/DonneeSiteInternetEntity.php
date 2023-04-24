@@ -142,7 +142,7 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
        * wb-horizon => 15 carateres.
        * on peut prendre un sous domaine 25 carataires ( 15+25=40 ).
        */
-      $sub_domain = substr('abcdef', 0, 25);
+      $sub_domain = substr($sub_domain, 0, 25);
       // Verifie si le nom de domaine existe deja.
       $query = $this->entityTypeManager()->getStorage('domain_ovh_entity')->getQuery();
       $query->condition('sub_domain', $sub_domain . "%", 'LIKE');
