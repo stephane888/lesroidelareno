@@ -133,9 +133,16 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
     $string_nbre = strlen($this->getName());
     // On cree l'entite qui permettra de creer le domaine sur OVH.
     if ($string_nbre >= 3) {
-      $textConvert = new Convert($this->getName());
+      $textConvert = new Convert($this->enleverCaracteresSpeciaux($this->getName()));
       $sub_domain = $textConvert->toKebab();
       $sub_domain = preg_replace('/[^a-z0-9\-]/', "", $sub_domain);
+      // on limite le domaine à 20 carataire.
+      /**
+       * La longeur maximal est de 64 carateres pour un sous-domaine.
+       * wb-horizon => 15 carateres.
+       * on peut prendre un sous domaine 25 carataires ( 15+25=40 ).
+       */
+      $sub_domain = substr('abcdef', 0, 25);
       // Verifie si le nom de domaine existe deja.
       $query = $this->entityTypeManager()->getStorage('domain_ovh_entity')->getQuery();
       $query->condition('sub_domain', $sub_domain . "%", 'LIKE');
@@ -204,6 +211,26 @@ class DonneeSiteInternetEntity extends EditorialContentEntityBase implements Don
     else {
       throw new \Exception(" Nombre de caractaire inssuffisant ");
     }
+  }
+  
+  private function enleverCaracteresSpeciaux($text) {
+    $utf8 = [
+      '/[áàâãªä]/u' => 'a',
+      '/[ÁÀÂÃÄ]/u' => 'A',
+      '/[ÍÌÎÏ]/u' => 'I',
+      '/[íìîï]/u' => 'i',
+      '/[éèêë]/u' => 'e',
+      '/[ÉÈÊË]/u' => 'E',
+      '/[óòôõºö]/u' => 'o',
+      '/[ÓÒÔÕÖ]/u' => 'O',
+      '/[úùûü]/u' => 'u',
+      '/[ÚÙÛÜ]/u' => 'U',
+      '/ç/' => 'c',
+      '/Ç/' => 'C',
+      '/ñ/' => 'n',
+      '/Ñ/' => 'N'
+    ];
+    return preg_replace(array_keys($utf8), array_values($utf8), $text);
   }
   
   /**
