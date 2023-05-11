@@ -1,5 +1,0 @@
-entity.donnee_internet_entity.add_form:
-  route_name: entity.donnee_internet_entity.add_form
-  title: "Add Donnee site internet des utilisateurs"
-  appears_on:
-    - entity.donnee_internet_entity.collection
