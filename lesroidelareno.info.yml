@@ -4,7 +4,4 @@ description: Contient des focntionnaitée specifique au site lesroidelareno.fr
 package: Custom
 core: 8.x
 core_version_requirement: ^8 || ^9
-dependencies:
-  - domain:domain
-  - domain_access:domain_access
-  - ovh_api_rest:ovh_api_rest
+
