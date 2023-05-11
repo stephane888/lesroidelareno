@@ -1,7 +1,0 @@
-block.settings.lesroidelareno_titre_de_la_page_encours:
-  type: block_settings
-  label: 'Titre de la page encours block'
-  mapping:
-    foo:
-      type: string
-      label: Foo
