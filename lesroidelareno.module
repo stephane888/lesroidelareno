@@ -11,6 +11,29 @@ use Drupal\file\Entity\File;
 use Drupal\user\Entity\User;
 use Drupal\views\ViewExecutable;
 use Drupal\language\Entity\ContentLanguageSettings;
+use Drupal\lesroidelareno\LesroidelarenoBlocksContentsListBuilder;
+use Drupal\domain_source\DomainSourceElementManagerInterface;
+use Drupal\domain_access\DomainAccessManagerInterface;
+
+/**
+ * implement hook_ENTITY_TYPE_presave
+ * Objectif est d'ajouté le domaine encours à chaque element du panier.
+ * "commerce_order_item" porte les elements du panier
+ */
+function lesroidelareno_commerce_order_item_presave(\Drupal\commerce_order\Entity\OrderItem $entity) {
+  if ($entity->isNew()) {
+    /**
+     *
+     * @var \Drupal\domain_source\HttpKernel\DomainSourcePathProcessor $domain_source
+     */
+    $domain_source = \Drupal::service('domain_source.path_processor');
+    $domain = $domain_source->getActiveDomain();
+    if ($domain) {
+      $entity->set(DomainSourceElementManagerInterface::DOMAIN_SOURCE_FIELD, $domain->id());
+      $entity->set(DomainAccessManagerInterface::DOMAIN_ACCESS_FIELD, $domain->id());
+    }
+  }
+}
 
 /**
  * Implements hook_theme().
@@ -614,6 +637,11 @@ function lesroidelareno_form_alter(&$form, FormStateInterface $form_state, $form
 function lesroidelareno_form_paragraphs_type_edit_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
 }
 
+function lesroidelareno_entity_type_alter(array &$entity_types) {
+  $entity_types['blocks_contents']->setHandlerClass('list_builder', LesroidelarenoBlocksContentsListBuilder::class);
+  // $entity_types['user']->setListBuilderClass(MyModuleListBuilder::class); //
+  // Other solution possible
+}
 
 
 // /**
