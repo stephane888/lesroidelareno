@@ -6,21 +6,28 @@ use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Session\AccountInterface;
 use Drupal\Core\Template\Attribute;
-use Drupal\block_content\Entity\BlockContent;
+use Drupal\Core\Entity\EntityInterface;
 use Drupal\file\Entity\File;
 use Drupal\user\Entity\User;
 use Drupal\views\ViewExecutable;
-use Drupal\language\Entity\ContentLanguageSettings;
-use Drupal\lesroidelareno\LesroidelarenoBlocksContentsListBuilder;
+use Drupal\lesroidelareno\HandlerClass\BlocksContentsListBuilder;
+use Drupal\lesroidelareno\HandlerClass\BlocksContentsAccess;
+use Drupal\lesroidelareno\HandlerClass\NodeAccess;
+use Drupal\lesroidelareno\HandlerClass\BlockContentAccess;
+use Drupal\lesroidelareno\HandlerClass\ParagraphAccess;
+use Drupal\lesroidelareno\HandlerClass\CommerceProductAccess;
 use Drupal\domain_source\DomainSourceElementManagerInterface;
 use Drupal\domain_access\DomainAccessManagerInterface;
+use Drupal\lesroidelareno\lesroidelareno;
+use Drupal\entity\EntityPermissionProvider;
 
 /**
- * implement hook_ENTITY_TYPE_presave
- * Objectif est d'ajouté le domaine encours à chaque element du panier.
- * "commerce_order_item" porte les elements du panier
+ * implement hook_entity_presave
+ * Objectif principale est de mettre à jour les données de chaque sauvegarder,
+ * afin d'ameliorer la securité.
  */
-function lesroidelareno_commerce_order_item_presave(\Drupal\commerce_order\Entity\OrderItem $entity) {
+function lesroidelareno_entity_presave(EntityInterface $entity) {
+  $entity_id = $entity->getEntityTypeId();
   if ($entity->isNew()) {
     /**
      *
@@ -28,11 +35,55 @@ function lesroidelareno_commerce_order_item_presave(\Drupal\commerce_order\Entit
      */
     $domain_source = \Drupal::service('domain_source.path_processor');
     $domain = $domain_source->getActiveDomain();
-    if ($domain) {
-      $entity->set(DomainSourceElementManagerInterface::DOMAIN_SOURCE_FIELD, $domain->id());
-      $entity->set(DomainAccessManagerInterface::DOMAIN_ACCESS_FIELD, $domain->id());
+    //
+    $RolesHaveSites = lesroidelareno::RolesHaveSites();
+    $roles = \Drupal::currentUser()->getRoles();
+    $uid = \Drupal::currentUser()->id();
+    $isAdministrator = false;
+    if (in_array('administrator', $roles))
+      $isAdministrator = true;
+    $isOwnerSite = false;
+    // if (in_array('administrator', $roles))
+    /**
+     * Objectif est d'ajouté le domaine encours à chaque element du panier.
+     * "commerce_order_item" porte les elements du panier
+     */
+    if ($entity_id == 'commerce_order_item') {
+      if ($domain) {
+        $entity->set(DomainSourceElementManagerInterface::DOMAIN_SOURCE_FIELD, $domain->id());
+        $entity->set(DomainAccessManagerInterface::DOMAIN_ACCESS_FIELD, $domain->id());
+      }
+    }
+    /**
+     * Pour un nouveau (blocks_contents, node ...), si l'utilisateur n'a
+     * pas de role adminitrator, alors on met à jour l'auteur.
+     */
+    elseif (!$isAdministrator) {
+      if ($entity_id == 'blocks_contents' || $entity_id == 'node' || $entity_id == 'block_content' || $entity_id == 'paragraph' || $entity_id == 'commerce_product') {
+        $entity->setOwnerId($uid);
+      }
     }
   }
+}
+
+/**
+ * Cette fonction permet de de controller la maniere donc les contenus vont
+ * s'afficher, etre creer, supprimer.
+ * ( Pour les utilisateurs supplementaire qui pourront etre ajouter, on doit
+ * charger les données en verifiant les droits des utilisateurs proprietaire de
+ * site web et les doits qui leurs sont accordées ).
+ *
+ * @param array $entity_types
+ */
+function lesroidelareno_entity_type_alter(array &$entity_types) {
+  $entity_types['blocks_contents']->setHandlerClass('list_builder', BlocksContentsListBuilder::class);
+  $entity_types['blocks_contents']->setHandlerClass('access', BlocksContentsAccess::class);
+  $entity_types['node']->setHandlerClass('access', NodeAccess::class);
+  $entity_types['block_content']->setHandlerClass('access', BlockContentAccess::class);
+  $entity_types['paragraph']->setHandlerClass('access', ParagraphAccess::class);
+  $entity_types['commerce_product']->setHandlerClass('access', CommerceProductAccess::class);
+  // $entity_types['user']->setListBuilderClass(MyModuleListBuilder::class); //
+  // Other solution possible
 }
 
 /**
@@ -135,6 +186,17 @@ function lesroidelareno_editor_js_settings_alter(array &$settings) {
 function lesroidelareno_preprocess_html(&$vars) {
   $routeName = \Drupal::routeMatch()->getRouteName();
   // dump($routeName);
+  // // on charge une route
+  // /**
+  // *
+  // * @var \Drupal\Core\Routing\RouteProvider $route_provider
+  // */
+  // $route_provider = \Drupal::service('router.route_provider');
+  // $route =
+  // $route_provider->getRouteByName('entity.commerce_product.add_form');
+  // dump($route);
+  //
+  //
   // $parameters = \Drupal::routeMatch()->getParameters()->all();
   // $parameters = \Drupal::routeMatch()->getParameters()->all();
   // if (!empty($parameters['content_generate_entity'])) {
@@ -450,9 +512,17 @@ function lesroidelareno_entity_field_access($operation, FieldDefinitionInterface
 /**
  * implement hook_ENTITY_TYPE_access
  */
-function lesroidelareno_domain_access(\Drupal\Core\Entity\EntityInterface $entity, $operation, AccountInterface $account) {
-  if ($operation == 'view') {
-    //
+function lesroidelareno_blocks_contents_access(\Drupal\blockscontent\Entity\BlocksContents $entity, $operation, AccountInterface $account) {
+  $RolesHaveSites = \Drupal\lesroidelareno\lesroidelareno::RolesHaveSites();
+  $roles = \Drupal::currentUser()->getRoles();
+  $uid = \Drupal::currentUser()->id();
+  if ($operation == 'update' || $operation == 'delete') {
+    foreach ($RolesHaveSites as $role) {
+      // si c'est l'auteur et qu'il a le role.
+      if ($entity->getOwnerId() == $uid && isset($roles[$role])) {
+        return AccessResult::allowed();
+      }
+    }
   }
 }
 
@@ -637,11 +707,7 @@ function lesroidelareno_form_alter(&$form, FormStateInterface $form_state, $form
 function lesroidelareno_form_paragraphs_type_edit_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
 }
 
-function lesroidelareno_entity_type_alter(array &$entity_types) {
-  $entity_types['blocks_contents']->setHandlerClass('list_builder', LesroidelarenoBlocksContentsListBuilder::class);
-  // $entity_types['user']->setListBuilderClass(MyModuleListBuilder::class); //
-  // Other solution possible
-}
+
 
 
 // /**
