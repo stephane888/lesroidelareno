@@ -92,25 +92,30 @@ class lesroidelareno {
    */
   static public function userIsAdministratorSite() {
     if (self::$userIsAdministratorSite === NULL) {
-      /**
-       *
-       * @var \Drupal\domain_source\HttpKernel\DomainSourcePathProcessor $domain_source
-       */
-      $domain_source = \Drupal::service('domain_source.path_processor');
-      $domain = $domain_source->getActiveDomain();
-      if ($domain && self::isOwnerSite()) {
-        $uid = self::getCurrentUserId();
-        $user = \Drupal\user\Entity\User::load($uid);
-        $domaines = $user->get('field_domain_admin')->getValue();
-        foreach ($domaines as $value) {
-          if ($value['target_id'] == $domain->id()) {
-            self::$userIsAdministratorSite = true;
-            break;
+      if (self::isAdministrator()) {
+        self::$userIsAdministratorSite = true;
+      }
+      else {
+        /**
+         *
+         * @var \Drupal\domain_source\HttpKernel\DomainSourcePathProcessor $domain_source
+         */
+        $domain_source = \Drupal::service('domain_source.path_processor');
+        $domain = $domain_source->getActiveDomain();
+        if ($domain && self::isOwnerSite()) {
+          $uid = self::getCurrentUserId();
+          $user = \Drupal\user\Entity\User::load($uid);
+          $domaines = $user->get('field_domain_admin')->getValue();
+          foreach ($domaines as $value) {
+            if ($value['target_id'] == $domain->id()) {
+              self::$userIsAdministratorSite = true;
+              break;
+            }
           }
         }
+        else
+          self::$userIsAdministratorSite = false;
       }
-      else
-        self::$userIsAdministratorSite = false;
     }
     return self::$userIsAdministratorSite;
   }
