@@ -42,11 +42,7 @@ class WebformAccess extends WebformEntityAccessControlHandler {
     switch ($operation) {
       // Tout le monde peut voir les contenus publiées.
       case 'view':
-        if ($entity->isPublished()) {
-          return AccessResult::allowed();
-        }
-        elseif ($isAdministrator)
-          return AccessResult::allowed();
+        return AccessResult::allowed();
       // On met à jour si l'utilisateur est autheur ou s'il est administrateur.
       case 'update':
       case 'delete':
