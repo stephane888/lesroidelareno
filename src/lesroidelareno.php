@@ -104,7 +104,7 @@ class lesroidelareno {
         $domaines = $user->get('field_domain_admin')->getValue();
         foreach ($domaines as $value) {
           if ($value['target_id'] == $domain->id()) {
-            self::$userIsAdministratorSite = false;
+            self::$userIsAdministratorSite = true;
             break;
           }
         }
