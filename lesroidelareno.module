@@ -15,11 +15,17 @@ use Drupal\lesroidelareno\HandlerClass\BlocksContentsAccess;
 use Drupal\lesroidelareno\HandlerClass\NodeAccess;
 use Drupal\lesroidelareno\HandlerClass\BlockContentAccess;
 use Drupal\lesroidelareno\HandlerClass\ParagraphAccess;
+use Drupal\lesroidelareno\HandlerClass\configThemeAccess;
+use Drupal\lesroidelareno\HandlerClass\SiteInternetAccess;
 use Drupal\lesroidelareno\HandlerClass\CommerceProductAccess;
+use Drupal\lesroidelareno\HandlerClass\CommervceProductVariationAccess;
+use Drupal\lesroidelareno\HandlerClass\WebformAccess;
 use Drupal\domain_source\DomainSourceElementManagerInterface;
 use Drupal\domain_access\DomainAccessManagerInterface;
 use Drupal\lesroidelareno\lesroidelareno;
-use Drupal\entity\EntityPermissionProvider;
+use Drupal\Core\Entity\EntityTypeInterface;
+use Drupal\Core\Field\BaseFieldDefinition;
+use Drupal\Core\Field\FieldStorageDefinitionInterface;
 
 /**
  * implement hook_entity_presave
@@ -29,38 +35,67 @@ use Drupal\entity\EntityPermissionProvider;
 function lesroidelareno_entity_presave(EntityInterface $entity) {
   $entity_id = $entity->getEntityTypeId();
   if ($entity->isNew()) {
-    /**
-     *
-     * @var \Drupal\domain_source\HttpKernel\DomainSourcePathProcessor $domain_source
-     */
-    $domain_source = \Drupal::service('domain_source.path_processor');
-    $domain = $domain_source->getActiveDomain();
-    //
-    $RolesHaveSites = lesroidelareno::RolesHaveSites();
     $roles = \Drupal::currentUser()->getRoles();
-    $uid = \Drupal::currentUser()->id();
+    $uid = lesroidelareno::getCurrentUserId();
     $isAdministrator = false;
     if (in_array('administrator', $roles))
       $isAdministrator = true;
-    $isOwnerSite = false;
-    // if (in_array('administrator', $roles))
+    
     /**
      * Objectif est d'ajouté le domaine encours à chaque element du panier.
      * "commerce_order_item" porte les elements du panier
      */
     if ($entity_id == 'commerce_order_item') {
+      /**
+       *
+       * @var \Drupal\domain_source\HttpKernel\DomainSourcePathProcessor $domain_source
+       */
+      $domain_source = \Drupal::service('domain_source.path_processor');
+      $domain = $domain_source->getActiveDomain();
       if ($domain) {
         $entity->set(DomainSourceElementManagerInterface::DOMAIN_SOURCE_FIELD, $domain->id());
         $entity->set(DomainAccessManagerInterface::DOMAIN_ACCESS_FIELD, $domain->id());
       }
     }
+    elseif ($entity_id == 'paragraph') {
+      /**
+       * Lors de la creation d'un paragraph on remplit automatiquement le champs
+       * 'wbh_user_id'.
+       */
+      $entity->set('wbh_user_id', $uid);
+    }
     /**
-     * Pour un nouveau (blocks_contents, node ...), si l'utilisateur n'a
-     * pas de role adminitrator, alors on met à jour l'auteur.
+     * Lors de la creaion d'un utilisateur on doit l'assigner un domaine, sauf
+     * s'il en a deja.
      */
-    elseif (!$isAdministrator) {
-      if ($entity_id == 'blocks_contents' || $entity_id == 'node' || $entity_id == 'block_content' || $entity_id == 'paragraph' || $entity_id == 'commerce_product') {
-        $entity->setOwnerId($uid);
+    elseif ($entity_id == 'user') {
+      $domaines = $entity->get('field_domain_access')->getValue();
+      if (!$domaines) {
+        /**
+         *
+         * @var \Drupal\domain_source\HttpKernel\DomainSourcePathProcessor $domain_source
+         */
+        $domain_source = \Drupal::service('domain_source.path_processor');
+        $domain = $domain_source->getActiveDomain();
+        if ($domain)
+          $entity->set('field_domain_access', $domain->id());
+      }
+    }
+    else {
+      if (!$isAdministrator) {
+        /**
+         * Pour un nouveau (blocks_contents, node ...), si l'utilisateur n'a
+         * pas de role adminitrator, alors on met à jour l'auteur.
+         * ( cela ne fonctionne toujours pas par defafut ).
+         * Lorsqu'un utilisateur cree un de ses contenus on force son id, car
+         * les
+         * informations pour initialiser la creation de l'entité peuvent
+         * provenir
+         * d'un autre entite creer par une autre personne.
+         */
+        if ($entity_id == 'blocks_contents' || $entity_id == 'node' || $entity_id == 'block_content' || $entity_id == 'commerce_product') {
+          $entity->setOwnerId($uid);
+        }
       }
     }
   }
@@ -82,8 +117,70 @@ function lesroidelareno_entity_type_alter(array &$entity_types) {
   $entity_types['block_content']->setHandlerClass('access', BlockContentAccess::class);
   $entity_types['paragraph']->setHandlerClass('access', ParagraphAccess::class);
   $entity_types['commerce_product']->setHandlerClass('access', CommerceProductAccess::class);
+  $entity_types['config_theme_entity']->setHandlerClass('access', configThemeAccess::class);
+  $entity_types['site_internet_entity']->setHandlerClass('access', SiteInternetAccess::class);
+  $entity_types['commerce_product_variation']->setHandlerClass('access', CommervceProductVariationAccess::class);
+  $entity_types['webform']->setHandlerClass('access', WebformAccess::class);
+  // $entity_types['cv_entity']->setHandlerClass('access',
+  // configThemeAccess::class);
   // $entity_types['user']->setListBuilderClass(MyModuleListBuilder::class); //
   // Other solution possible
+}
+
+/**
+ * implement hook_entity_base_field_info
+ *
+ * @param EntityTypeInterface $entity_type
+ *
+ */
+function lesroidelareno_entity_base_field_info(EntityTypeInterface $entity_type) {
+  $fields = [];
+  if ($entity_type->id() == 'paragraph') {
+    /**
+     * Afin de ressoudre le probleme d'identification du proprietaire d'un
+     * paragraphe, on ajoute un champs wbh_user_id.
+     */
+    $fields['wbh_user_id'] = BaseFieldDefinition::create('entity_reference')->setLabel(t(' Auteur (wbh)'))->setDescription(t('The user ID of author of the paragrph entity.'))->setRevisionable(TRUE)->setSetting('target_type', 'user')->setSetting('handler', 'default')->setDisplayOptions('view', [
+      'label' => 'hidden',
+      'type' => 'author',
+      'weight' => 0
+    ])->setDescription("Idealement on doit pouvoir identifier le paragraph à partir de l'entité parente.")->setDisplayConfigurable('form', true)->setDisplayConfigurable('view', TRUE)->setDefaultValueCallback('\Drupal\lesroidelareno\lesroidelareno::getCurrentUserId');
+  }
+  
+  elseif ($entity_type->id() == 'dis_period_entity') {
+    __prise_rendez_vous_fields_domain($fields);
+  }
+  elseif ($entity_type->id() == 'equipes_entity') {
+    __prise_rendez_vous_fields_domain($fields);
+  }
+  elseif ($entity_type->id() == 'submit_rdv_entity') {
+    __prise_rendez_vous_fields_domain($fields);
+  }
+  
+  return $fields;
+}
+
+/**
+ * C'est specifique au type de contenu.
+ *
+ * @param array $fields
+ */
+function __prise_rendez_vous_fields_domain(array &$fields) {
+  $field_access = \Drupal\domain_access\DomainAccessManagerInterface::DOMAIN_ACCESS_FIELD;
+  $field_source = \Drupal\domain_source\DomainSourceElementManagerInterface::DOMAIN_SOURCE_FIELD;
+  //
+  $fields[$field_access] = BaseFieldDefinition::create('entity_reference')->setLabel(t("Domain access"))->setTranslatable(false)->setDisplayOptions('form', [
+    'type' => 'select2_entity_reference',
+    'weight' => 40,
+    'settings' => [
+      'autocomplete' => true
+    ]
+  ])->setSetting('handler', 'default')->setSetting('target_type', 'domain')->setDisplayConfigurable('form', TRUE)->setDisplayConfigurable('view', TRUE)->setDefaultValueCallback('\Drupal\creation_site_virtuel\CreationSiteVirtuel::getActiveDomain');
+  //
+  $fields[$field_source] = BaseFieldDefinition::create('entity_reference')->setLabel(t("Domain source"))->setDisplayOptions('form', [
+    'type' => 'options_select',
+    'weight' => 40
+  ])->setSetting('handler', 'default')->setSetting('target_type', 'domain')->setDisplayConfigurable('form', TRUE)->setDisplayConfigurable('view', TRUE)->setTranslatable(false);
 }
 
 /**
@@ -92,6 +189,51 @@ function lesroidelareno_entity_type_alter(array &$entity_types) {
 function lesroidelareno_theme() {
   $hooks = [];
   return $hooks;
+}
+
+// function lesroidelareno_preprocess_formatage_models_quickly_edit(&$vars) {
+// \Drupal::messenger()->addStatus("lesroidelareno_preprocess_formatage_models_quickly_edit");
+// }
+
+/**
+ * implement hook_preprocess_HOOK.
+ *
+ * Verifier les access de l'utilisateur connecté.
+ *
+ * @param array $vars
+ */
+function lesroidelareno_preprocess_formatage_models_quickly_edit__wbh(&$vars) {
+  if (!lesroidelareno::userIsAdministratorSite())
+    $vars['status_edit'] = false;
+}
+
+/**
+ * implement hook_theme_suggestions_HOOK_alter
+ *
+ * @param array $suggestions
+ * @param array $variables
+ * @see core/lib/Drupal/Core/Render/theme.api.php
+ */
+function lesroidelareno_theme_suggestions_formatage_models_quickly_edit(array $variables) {
+  $suggestions = [];
+  $suggestions[] = 'formatage_models_quickly_edit__wbh';
+  return $suggestions;
+}
+
+/**
+ * On souhaite afficher les les boutons d'edition uniquement si l'utilisateur
+ * est proprietaire du site.
+ *
+ * @param array $vars
+ */
+function lesroidelareno_preprocess_menu_local_tasks(&$vars) {
+  /**
+   * On vide les elements tasks si l'utilisateur n'est pas sur son domaine.
+   */
+  if (!lesroidelareno::userIsAdministratorSite()) {
+    $vars['primary'] = [];
+    $vars['secondary'] = [];
+  }
 }
 
 /**
@@ -510,23 +652,6 @@ function lesroidelareno_entity_field_access($operation, FieldDefinitionInterface
 }
 
 /**
- * implement hook_ENTITY_TYPE_access
- */
-function lesroidelareno_blocks_contents_access(\Drupal\blockscontent\Entity\BlocksContents $entity, $operation, AccountInterface $account) {
-  $RolesHaveSites = \Drupal\lesroidelareno\lesroidelareno::RolesHaveSites();
-  $roles = \Drupal::currentUser()->getRoles();
-  $uid = \Drupal::currentUser()->id();
-  if ($operation == 'update' || $operation == 'delete') {
-    foreach ($RolesHaveSites as $role) {
-      // si c'est l'auteur et qu'il a le role.
-      if ($entity->getOwnerId() == $uid && isset($roles[$role])) {
-        return AccessResult::allowed();
-      }
-    }
-  }
-}
-
-/**
  *
  * @param \Drupal\mysql\Driver\Database\mysql\Select $query
  */
@@ -697,15 +822,15 @@ function lesroidelareno_form_alter(&$form, FormStateInterface $form_state, $form
   // hook_form_FORM_ID_alter
 }
 
-/**
- * Permet d'ajouter la configuration des langues sur chaque paragraphes.
- *
- * @param array $form
- * @param \Drupal\Core\Form\FormStateInterface $form_state
- * @param int $form_id
- */
-function lesroidelareno_form_paragraphs_type_edit_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
-}
+// /**
+//  * Permet d'ajouter la configuration des langues sur chaque paragraphes.
+//  *
+//  * @param array $form
+//  * @param \Drupal\Core\Form\FormStateInterface $form_state
+//  * @param int $form_id
+//  */
+// function lesroidelareno_form_paragraphs_type_edit_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
+// }
 
 
 

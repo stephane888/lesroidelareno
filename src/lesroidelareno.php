@@ -21,13 +21,19 @@ class lesroidelareno {
    *
    * @var boolean
    */
-  private static $isOwnerSite = null;
+  private static $isOwnerSite = NULL;
   
   /**
    *
    * @var boolean
    */
-  private static $isAdministrator = null;
+  private static $isAdministrator = NULL;
+  
+  /**
+   *
+   * @var boolean
+   */
+  private static $userIsAdministratorSite = NULL;
   
   /**
    *
@@ -61,7 +67,8 @@ class lesroidelareno {
   }
   
   /**
-   * L'utilisateur connecté est proprietaire de site ? true:false;
+   * L'utilisateur connecté est proprietaire d'un site ou a les roles pour gerer
+   * un site ? true:false;
    * On doit mettre le resultat en cache pour l'utilisateur et le domaine.
    * // on doit utiliser les caches pour cette information ?
    */
@@ -77,6 +84,35 @@ class lesroidelareno {
       }
     }
     return self::$isOwnerSite;
+  }
+  
+  /**
+   * Permet de determiner si l'utilisateur connecter est administrateur du site.
+   * (il faudra mettre en cache en fonction de la session et du domaine ).
+   */
+  static public function userIsAdministratorSite() {
+    if (self::$userIsAdministratorSite === NULL) {
+      /**
+       *
+       * @var \Drupal\domain_source\HttpKernel\DomainSourcePathProcessor $domain_source
+       */
+      $domain_source = \Drupal::service('domain_source.path_processor');
+      $domain = $domain_source->getActiveDomain();
+      if ($domain && self::isOwnerSite()) {
+        $uid = self::getCurrentUserId();
+        $user = \Drupal\user\Entity\User::load($uid);
+        $domaines = $user->get('field_domain_admin')->getValue();
+        foreach ($domaines as $value) {
+          if ($value['target_id'] == $domain->id()) {
+            self::$userIsAdministratorSite = false;
+            break;
+          }
+        }
+      }
+      else
+        self::$userIsAdministratorSite = false;
+    }
+    return self::$userIsAdministratorSite;
   }
   
 }
