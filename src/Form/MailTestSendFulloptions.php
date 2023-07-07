@@ -5,6 +5,8 @@ namespace Drupal\lesroidelareno\Form;
 use Drupal\Core\Form\ConfigFormBase;
 use Drupal\Core\Form\FormStateInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\Mime\Header\MailboxHeader;
+use Symfony\Component\Mime\Address;
 
 /**
  * Class MailTestSendFulloptions.
@@ -122,15 +124,23 @@ class MailTestSendFulloptions extends ConfigFormBase {
     $config->set('mails_en_cc', $form_state->getValue('mails_en_cc'));
     $config->save();
     // send mails.
-    
+    $email_from = "contact@wb-horizon.com";
     $langcode = \Drupal::currentUser()->getPreferredLangcode();
     $datas = [
       'id' => 'test_maidfddfdions',
       'to' => $form_state->getValue('name') . " <" . $form_state->getValue('destinataire') . ">",
       'subject' => $form_state->getValue('sujet'),
       'body' => $form_state->getValue('message_brute') . $form_state->getValue('message_html')['value'],
-      'headers' => []
+      'headers' => [
+        'From' => $email_from,
+        'Sender' => $email_from,
+        'Return-Path' => $email_from
+      ]
     ];
+    //
+    $mailbox = new MailboxHeader('From', new Address($email_from, "Wb-Horizon"));
+    $datas['headers']['From'] = $mailbox->getBodyAsString();
+    //
     $this->pluginManagerMail->mail($datas);
   }
   
