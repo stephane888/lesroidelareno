@@ -13,3 +13,9 @@ donnee_internet_entity.admin.structure.settings:
   parent: system.admin_structure
   weight: 40
 
+lesroidelareno.mail_test_send_fulloptions:
+  title: 'MailTestSendFulloptions'
+  route_name: lesroidelareno.mail_test_send_fulloptions
+  description: 'permet de tester l'envoit de mail'
+  parent: system.admin_config_system
+  weight: 99

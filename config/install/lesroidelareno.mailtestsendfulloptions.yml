@@ -1,0 +1,5 @@
+lesroidelareno:
+  destinataire: "kksasteph888@gmail.com"
+  sujet: "test d'envoit de mail"
+  message_brute: "Contenu du message brute"
+  message_html: "content html"

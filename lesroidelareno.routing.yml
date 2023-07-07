@@ -5,3 +5,21 @@ lesroidelareno.clean_configs:
     _form: '\Drupal\lesroidelareno\Form\CleanConfigThemesAndEntitiesForm'
   requirements:
     _role: 'administrator'
+    
+lesroidelareno.test_send_mail:
+  path: '/lesroidelareno/form/test_send_mail'
+  defaults:
+    _form: '\Drupal\lesroidelareno\Form\TestSendMail'
+    _title: 'TestSendMail'
+  requirements:
+    _access: 'TRUE'
+    
+lesroidelareno.mail_test_send_fulloptions:
+  path: '/admin/config/lesroidelareno/mailtestsendfulloptions'
+  defaults:
+    _form: '\Drupal\lesroidelareno\Form\MailTestSendFulloptions'
+    _title: 'MailTestSendFulloptions'
+  requirements:
+    _permission: 'access administration pages'
+  options:
+    _admin_route: TRUE
