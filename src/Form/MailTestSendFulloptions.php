@@ -14,7 +14,7 @@ class MailTestSendFulloptions extends ConfigFormBase {
   /**
    * Drupal\Core\Mail\MailManagerInterface definition.
    *
-   * @var \Drupal\Core\Mail\MailManagerInterface
+   * @var \Drupal\lesroidelareno\Plugin\Mail\TestPhpMailerPlugin
    */
   protected $pluginManagerMail;
   
@@ -24,7 +24,7 @@ class MailTestSendFulloptions extends ConfigFormBase {
    */
   public static function create(ContainerInterface $container) {
     $instance = parent::create($container);
-    $instance->pluginManagerMail = $container->get('plugin.manager.mail');
+    $instance->pluginManagerMail = $container->get('lesroidelareno.test_php_mailer_plugin');
     return $instance;
   }
   
@@ -53,9 +53,15 @@ class MailTestSendFulloptions extends ConfigFormBase {
   public function buildForm(array $form, FormStateInterface $form_state) {
     $config = $this->config('lesroidelareno.mailtestsendfulloptions');
     
+    $form['name'] = [
+      '#type' => 'textfield',
+      '#title' => $this->t('Nom du destinataire'),
+      '#default_value' => $config->get('name'),
+      '#description' => $this->t('Nom')
+    ];
     $form['destinataire'] = [
       '#type' => 'textfield',
-      '#title' => $this->t('Destinataire'),
+      '#title' => $this->t('Email du destinataire'),
       '#default_value' => $config->get('destinataire'),
       '#description' => $this->t('Votre email')
     ];
@@ -106,7 +112,7 @@ class MailTestSendFulloptions extends ConfigFormBase {
   public function submitForm(array &$form, FormStateInterface $form_state) {
     parent::submitForm($form, $form_state);
     $config = $this->config('lesroidelareno.mailtestsendfulloptions');
-    $config->set('test', $form_state->getValue('test'));
+    $config->set('name', $form_state->getValue('name'));
     $config->set('destinataire', $form_state->getValue('destinataire'));
     $config->set('sujet', $form_state->getValue('sujet'));
     $config->set('message_brute', $form_state->getValue('message_brute'));
@@ -116,13 +122,16 @@ class MailTestSendFulloptions extends ConfigFormBase {
     $config->set('mails_en_cc', $form_state->getValue('mails_en_cc'));
     $config->save();
     // send mails.
-    $key = 'login_rx_vuejs_send_mail';
-    $to = $form_state->getValue('destinataire');
+    
     $langcode = \Drupal::currentUser()->getPreferredLangcode();
-    $params['message'] = $form_state->getValue('message_brute');
-    $params['message'] .= $form_state->getValue('message_html')['value'];
-    $params['subject'] = $form_state->getValue('sujet');
-    $this->pluginManagerMail->mail('lesroidelareno', $key, $to, $langcode, $params);
+    $datas = [
+      'id' => 'test_maidfddfdions',
+      'to' => $form_state->getValue('name') . " <" . $form_state->getValue('destinataire') . ">",
+      'subject' => $form_state->getValue('sujet'),
+      'body' => $form_state->getValue('message_brute') . $form_state->getValue('message_html')['value'],
+      'headers' => []
+    ];
+    $this->pluginManagerMail->mail($datas);
   }
   
 }

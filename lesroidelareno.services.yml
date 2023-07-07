@@ -4,12 +4,18 @@ services:
     arguments: ['@domain.negotiator', '@module_handler', '@entity_type.manager', '@path_alias.manager', '@config.factory']
     tags:
       - { name: path_processor_outbound, priority: 90 }      
+      
   lesroidelareno.system.entity_autocomplete:
     class: Drupal\lesroidelareno\Routing\RouteSubscriber
     tags:
       - { name: event_subscriber, priority: 90 }
+      
   lesroidelareno.jsonapi:
     class: Drupal\lesroidelareno\ResourceType\EventSubscriber\LesroidelarenoListener
     tags:
       - { name: event_subscriber, priority: 90 }
+      
+  lesroidelareno.test_php_mailer_plugin:
+    class: Drupal\lesroidelareno\Plugin\Mail\TestPhpMailerPlugin
+    arguments: []
   
