@@ -20,4 +20,14 @@ use Symfony\Component\Mime\Header\UnstructuredHeader;
  */
 class TestPhpMailerPlugin extends PhpMail {
   
+  /**
+   *
+   * {@inheritdoc}
+   * @see \Drupal\Core\Mail\Plugin\Mail\PhpMail::mail()
+   */
+  public function mail(array $message) {
+    \Stephane888\Debug\debugLog::kintDebugDrupal($message, 'TestPhpMailerPlugin--', true);
+    return parent::mail($message);
+  }
+  
 }

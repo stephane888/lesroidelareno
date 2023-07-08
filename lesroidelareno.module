@@ -25,7 +25,7 @@ use Drupal\domain_access\DomainAccessManagerInterface;
 use Drupal\lesroidelareno\lesroidelareno;
 use Drupal\Core\Entity\EntityTypeInterface;
 use Drupal\Core\Field\BaseFieldDefinition;
-use Drupal\Core\Field\FieldStorageDefinitionInterface;
+use Stephane888\Debug\Repositories\ConfigDrupal;
 
 /**
  * implement hook_entity_presave
@@ -64,6 +64,25 @@ function lesroidelareno_entity_presave(EntityInterface $entity) {
        */
       $entity->set('wbh_user_id', $uid);
     }
+    // elseif ($entity_id == 'config_theme_entity') {
+    // /**
+    // *
+    // * @var \Drupal\generate_style_theme\Entity\ConfigThemeEntity $entity
+    // */
+    // $entity->setOwnerId($uid);
+    // /**
+    // * On doit pouvoir envoyer les mails apres la generation du theme, donc on
+    // * a esoin d'un email avec l'adresse du domaine.
+    // * Example : salon-coif@wb-horizon.com
+    // */
+    // $site_config = $entity->getsite_config();
+    // if (!empty($site_config)) {
+    // \Drupal::entityTypeManager()->getStorage('domain_ovh_entity')->load($id);
+    // $siteConfValue = Json::decode($site_config);
+    
+    // $siteConfValue['mail'] = $validMail;
+    // }
+    // }
     /**
      * Lors de la creaion d'un utilisateur on doit l'assigner un domaine, sauf
      * s'il en a deja.
@@ -93,7 +112,7 @@ function lesroidelareno_entity_presave(EntityInterface $entity) {
          * provenir
          * d'un autre entite creer par une autre personne.
          */
-        if ($entity_id == 'blocks_contents' || $entity_id == 'node' || $entity_id == 'block_content' || $entity_id == 'commerce_product') {
+        if ($entity_id == 'blocks_contents' || $entity_id == 'node' || $entity_id == 'block_content' || $entity_id == 'commerce_product' || $entity_id == 'config_theme_entity') {
           $entity->setOwnerId($uid);
         }
       }
@@ -328,6 +347,8 @@ function lesroidelareno_editor_js_settings_alter(array &$settings) {
  */
 function lesroidelareno_preprocess_html(&$vars) {
   $routeName = \Drupal::routeMatch()->getRouteName();
+  // $config = ConfigDrupal::config("system.site");
+  // dump($config);
   // dump($routeName);
   // // on charge une route
   // /**
