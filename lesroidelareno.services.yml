@@ -18,4 +18,8 @@ services:
   lesroidelareno.test_php_mailer_plugin:
     class: Drupal\lesroidelareno\Plugin\Mail\TestPhpMailerPlugin
     arguments: []
+    
+  lesroidelareno.wbh_php_mailer_plugin:
+    class: Drupal\lesroidelareno\Plugin\Mail\WbhPhpMailerPlugin
+    arguments: ['@config.factory','@module_handler','@email.validator','@renderer']
   

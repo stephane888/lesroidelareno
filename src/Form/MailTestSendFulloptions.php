@@ -16,7 +16,7 @@ class MailTestSendFulloptions extends ConfigFormBase {
   /**
    * Drupal\Core\Mail\MailManagerInterface definition.
    *
-   * @var \Drupal\lesroidelareno\Plugin\Mail\TestPhpMailerPlugin
+   * @var \Drupal\lesroidelareno\Plugin\Mail\WbhPhpMailerPlugin
    */
   protected $pluginManagerMail;
   
@@ -26,7 +26,7 @@ class MailTestSendFulloptions extends ConfigFormBase {
    */
   public static function create(ContainerInterface $container) {
     $instance = parent::create($container);
-    $instance->pluginManagerMail = $container->get('lesroidelareno.test_php_mailer_plugin');
+    $instance->pluginManagerMail = $container->get('lesroidelareno.wbh_php_mailer_plugin');
     return $instance;
   }
   
@@ -127,7 +127,6 @@ class MailTestSendFulloptions extends ConfigFormBase {
     $email_from = "contact@wb-horizon.com";
     $langcode = \Drupal::currentUser()->getPreferredLangcode();
     $datas = [
-      'id' => 'test_maidfddfdions',
       'to' => $form_state->getValue('name') . " <" . $form_state->getValue('destinataire') . ">",
       'subject' => $form_state->getValue('sujet'),
       'body' => $form_state->getValue('message_brute') . $form_state->getValue('message_html')['value'],
@@ -141,7 +140,11 @@ class MailTestSendFulloptions extends ConfigFormBase {
     $mailbox = new MailboxHeader('From', new Address($email_from, "Wb-Horizon"));
     $datas['headers']['From'] = $mailbox->getBodyAsString();
     //
-    $this->pluginManagerMail->mail($datas);
+    $message = $this->pluginManagerMail->format($datas);
+    if ($this->pluginManagerMail->mail($message))
+      $this->messenger()->addStatus("le mail a été envoter à : " . $form_state->getValue('destinataire'));
+    else
+      $this->messenger()->addError("Erreur d'envoit de mail à " . $form_state->getValue('destinataire'));
   }
   
 }

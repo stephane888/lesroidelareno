@@ -26,7 +26,8 @@ class TestPhpMailerPlugin extends PhpMail {
    * @see \Drupal\Core\Mail\Plugin\Mail\PhpMail::mail()
    */
   public function mail(array $message) {
-    \Stephane888\Debug\debugLog::kintDebugDrupal($message, 'TestPhpMailerPlugin--', true);
+    // \Stephane888\Debug\debugLog::kintDebugDrupal($message,
+    // 'TestPhpMailerPlugin--', true);
     return parent::mail($message);
   }
   
