@@ -23,3 +23,12 @@ lesroidelareno.mail_test_send_fulloptions:
     _permission: 'access administration pages'
   options:
     _admin_route: TRUE
+
+lesroidelareno.manage_rdv_configs:
+  path: '/admin/lesroidelareno/prise-rendez-vous/update-default-configs'
+  defaults:
+    _title: 'Prise rendez vous settings'
+    _controller: '\Drupal\lesroidelareno\Controller\LesroidelarenoConfigController::UpdateDefaultConfigsCreneauRdv'
+  requirements:
+    _permission: 'access content'
+    _role: 'gerant_de_site_web+administrator'

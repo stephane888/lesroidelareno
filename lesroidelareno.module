@@ -20,6 +20,7 @@ use Drupal\lesroidelareno\HandlerClass\SiteInternetAccess;
 use Drupal\lesroidelareno\HandlerClass\CommerceProductAccess;
 use Drupal\lesroidelareno\HandlerClass\CommervceProductVariationAccess;
 use Drupal\lesroidelareno\HandlerClass\WebformAccess;
+use Drupal\lesroidelareno\HandlerClass\RdvConfigAccess;
 use Drupal\domain_source\DomainSourceElementManagerInterface;
 use Drupal\domain_access\DomainAccessManagerInterface;
 use Drupal\lesroidelareno\lesroidelareno;
@@ -140,6 +141,7 @@ function lesroidelareno_entity_type_alter(array &$entity_types) {
   $entity_types['site_internet_entity']->setHandlerClass('access', SiteInternetAccess::class);
   $entity_types['commerce_product_variation']->setHandlerClass('access', CommervceProductVariationAccess::class);
   $entity_types['webform']->setHandlerClass('access', WebformAccess::class);
+  $entity_types['rdv_config_entity']->setHandlerClass('access', RdvConfigAccess::class);
   // $entity_types['cv_entity']->setHandlerClass('access',
   // configThemeAccess::class);
   // $entity_types['user']->setListBuilderClass(MyModuleListBuilder::class); //
@@ -206,7 +208,15 @@ function __prise_rendez_vous_fields_domain(array &$fields) {
  * Implements hook_theme().
  */
 function lesroidelareno_theme() {
-  $hooks = [];
+  $hooks = [
+    // permet de fournir un titre et une description.
+    'lesroidelareno_texte_help' => [
+      'variables' => [
+        'titre' => null,
+        'description' => null
+      ]
+    ]
+  ];
   return $hooks;
 }
 
@@ -834,53 +844,58 @@ function lesroidelareno_preprocess_formatage_models_simple_block(&$vars) {
 }
 
 /**
- * Implements hook_entity_field_access().
+ * Implements hook_form_alter().
  */
 function lesroidelareno_form_alter(&$form, FormStateInterface $form_state, $form_id) {
   // on cache le champs: domain
   if (isset($form['domain']) && !\Drupal::currentUser()->hasPermission('administer site configuration')) {
     $form['domain']['#access'] = false;
   }
-  // hook_form_FORM_ID_alter
+  /**
+   * On ajoute une fonction de submit à la configuration des RDV afin qu'il
+   * redirige sur la page pour gerer les reservations.
+   */
+  elseif ($form_id == 'prise_rendez_vous_default_configs') {
+    $form['description_help'] = [
+      "#theme" => 'lesroidelareno_texte_help',
+      "#titre" => "Configuration de l'identifiant",
+      "#description" => "Vous pouvez concerserver les valeurs par defaut et passer à la prochaine etape.",
+      "#weight" => -10
+    ];
+    $form['actions']['submit']['#value'] = 'Etape suivante';
+    $form['#submit'][] = '_prise_rendez_vous_default_configs_submit';
+  }
+  // Redirection vers la page permettant de gerer les prises de rendez-vous.
+  elseif ($form_id == 'rdv_config_entity_form') {
+    $form['actions']['submit']['#submit'][] = '_rdv_config_entity_form_submit';
+  }
+  else {
+    // dump($form_id);
+  }
 }
 
-// /**
-//  * Permet d'ajouter la configuration des langues sur chaque paragraphes.
-//  *
-//  * @param array $form
-//  * @param \Drupal\Core\Form\FormStateInterface $form_state
-//  * @param int $form_id
-//  */
-// function lesroidelareno_form_paragraphs_type_edit_form_alter(&$form, \Drupal\Core\Form\FormStateInterface $form_state, $form_id) {
-// }
+/**
+ * Redirection vers la page permettant de gerer les prises de rendez-vous.
+ *
+ * @param array $form
+ * @param FormStateInterface $form_state
+ */
+function _prise_rendez_vous_default_configs_submit(array &$form, FormStateInterface $form_state) {
+  $form_state->setRedirect('lesroidelareno.manage_rdv_configs');
+}
+
+/**
+ * Apres soumition, on redirige vers le tableeau de bord.
+ *
+ * @param array $form
+ * @param FormStateInterface $form_state
+ */
+function _rdv_config_entity_form_submit(array &$form, FormStateInterface $form_state) {
+  $form_state->setRedirect('user.page');
+}
 
 
 
 
-// /**
-//  * Implement hook_jsonapi_entity_filter_access()
-//  */
-// function lesroidelareno_jsonapi_entity_filter_access(\Drupal\Core\Entity\EntityTypeInterface $entity_type, \Drupal\Core\Session\AccountInterface $account) {
-//   // dump($entity_type);
-//   // For every entity type that has an admin permission, allow access to filter
-//   // by all entities of that type to users with that permission.
-//   return ([
-//     JSONAPI_FILTER_AMONG_ALL => AccessResult::forbidden(),
-//     JSONAPI_FILTER_AMONG_PUBLISHED => AccessResult::forbidden(),
-//     JSONAPI_FILTER_AMONG_ENABLED => AccessResult::forbidden(),
-//     JSONAPI_FILTER_AMONG_OWN => AccessResult::allowed()
-//   ]);
-// }
 
-// /**
-//  * Implement hook_jsonapi_ENTITY_TYPE_filter_access()
-//  */
-// function lesroidelareno_jsonapi_site_internet_entity_filter_access(\Drupal\Core\Entity\EntityTypeInterface $entity_type, \Drupal\Core\Session\AccountInterface $account) {
-//   return ([
-//     JSONAPI_FILTER_AMONG_ALL => AccessResult::forbidden(),
-//     JSONAPI_FILTER_AMONG_PUBLISHED => AccessResult::forbidden(),
-//     JSONAPI_FILTER_AMONG_ENABLED => AccessResult::forbidden(),
-//     JSONAPI_FILTER_AMONG_OWN => AccessResult::allowed()
-//   ]);
-// }
 
