@@ -3,3 +3,8 @@ entity.donnee_internet_entity.add_form:
   title: "Add Donnee site internet des utilisateurs"
   appears_on:
     - entity.donnee_internet_entity.collection
+entity.commerce_payment_config.add_form:
+  route_name: entity.commerce_payment_config.add_form
+  title: 'Add Commerce payment config'
+  appears_on:
+    - entity.commerce_payment_config.collection

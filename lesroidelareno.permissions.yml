@@ -33,3 +33,34 @@ delete all donnee site internet des utilisateurs revisions:
   title: 'Delete all revisions'
   description: 'Role requires permission to <em>view Donnee site internet des utilisateurs revisions</em> and <em>delete rights</em> for donnee site internet des utilisateurs entities in question or <em>administer donnee site internet des utilisateurs entities</em>.'
 
+add commerce payment config entities:
+  title: 'Create new Commerce payment config entities'
+
+administer commerce payment config entities:
+  title: 'Administer Commerce payment config entities'
+  description: 'Allow to access the administration form to configure Commerce payment config entities.'
+  restrict access: true
+
+delete commerce payment config entities:
+  title: 'Delete Commerce payment config entities'
+
+edit commerce payment config entities:
+  title: 'Edit Commerce payment config entities'
+
+view published commerce payment config entities:
+  title: 'View published Commerce payment config entities'
+
+view unpublished commerce payment config entities:
+  title: 'View unpublished Commerce payment config entities'
+
+view all commerce payment config revisions:
+  title: 'View all Commerce payment config revisions'
+
+revert all commerce payment config revisions:
+  title: 'Revert all Commerce payment config revisions'
+  description: 'Role requires permission <em>view Commerce payment config revisions</em> and <em>edit rights</em> for commerce payment config entities in question or <em>administer commerce payment config entities</em>.'
+
+delete all commerce payment config revisions:
+  title: 'Delete all revisions'
+  description: 'Role requires permission to <em>view Commerce payment config revisions</em> and <em>delete rights</em> for commerce payment config entities in question or <em>administer commerce payment config entities</em>.'
+

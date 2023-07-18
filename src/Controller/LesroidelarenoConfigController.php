@@ -6,6 +6,13 @@ use Drupal\Core\Controller\ControllerBase;
 use Stephane888\Debug\Repositories\ConfigDrupal;
 use Drupal\prise_rendez_vous\Entity\RdvConfigEntity;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\Core\Url;
+use Drupal\commerce_payment\Entity\PaymentGateway;
+use Symfony\Component\HttpFoundation\Request;
+use Drupal\lesroidelareno\Entity\CommercePaymentConfig;
+use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\domain\DomainNegotiatorInterface;
+use Drupal\lesroidelareno\lesroidelareno;
 
 /**
  * Class DonneeSiteInternetEntityController.
@@ -13,6 +20,88 @@ use Drupal\Core\Form\FormStateInterface;
  * Returns responses for Donnee site internet des utilisateurs routes.
  */
 class LesroidelarenoConfigController extends ControllerBase {
+  /**
+   *
+   * @var \Drupal\domain\DomainNegotiatorInterface
+   */
+  protected $domainNegotiator;
+  
+  public static function create(ContainerInterface $container) {
+    return new static($container->get('domain.negotiator'));
+  }
+  
+  public function __construct(DomainNegotiatorInterface $domainNegotiator) {
+    $this->domainNegotiator = $domainNegotiator;
+  }
+  
+  /**
+   * --
+   */
+  public function PayementGateways(Request $request, $payment_plugin_id) {
+    /**
+     * Contient les payments qui peuvent etre utiliser par les clients.
+     *
+     * @var array $validPayments
+     */
+    $validPayments = [
+      'stripe_cart_by_domain',
+      'commander'
+    ];
+    // permet de lister tous les plugins
+    if ($payment_plugin_id == 'list-all') {
+      $links = [];
+      foreach ($validPayments as $value) {
+        $PaymentGateway = PaymentGateway::load($value);
+        if ($PaymentGateway) {
+          $links[] = [
+            'title' => $PaymentGateway->label(),
+            'url' => Url::fromRoute("lesroidelareno.payement_gateways", [
+              'payment_plugin_id' => $PaymentGateway->id()
+            ], [
+              'query' => [
+                'destination' => $request->getPathInfo()
+              ]
+            ])
+          ];
+        }
+      }
+      return [
+        '#theme' => 'links',
+        '#links' => $links
+      ];
+    }
+    else {
+      $datas = $this->entityTypeManager()->getStorage('commerce_payment_config')->loadByProperties([
+        'domain_id' => $this->domainNegotiator->getActiveId(),
+        'payment_plugin_id' => $payment_plugin_id
+      ]);
+      if (!$datas) {
+        $CommercePaymentConfig = CommercePaymentConfig::create([
+          'domain_id' => $this->domainNegotiator->getActiveId(),
+          'payment_plugin_id' => $payment_plugin_id
+        ]);
+        $CommercePaymentConfig->save();
+      }
+      else {
+        $CommercePaymentConfig = reset($datas);
+      }
+      $form = $this->entityFormBuilder()->getForm($CommercePaymentConfig);
+      // $form['payment_plugin_id']['widget'][0]['value']['#attributes']['readonly']
+      // = 'readonly';
+      if (!lesroidelareno::isAdministrator()) {
+        $form['domain_id']['#access'] = false;
+        $form['payment_plugin_id']['#access'] = false;
+      }
+      // on masque les champs non desirer.
+      if ($CommercePaymentConfig->get('payment_plugin_id')->value != 'stripe_cart_by_domain') {
+        $form['publishable_key']['#access'] = false;
+        $form['secret_key']['#access'] = false;
+        $form['mode']['#access'] = false;
+      }
+      return $form;
+    }
+    return [];
+  }
   
   /**
    * Permet de configurer les prises de RDV.
@@ -52,4 +141,9 @@ class LesroidelarenoConfigController extends ControllerBase {
   // '#value' => 'Page config 2'
   // ];
   // }
+
+/**
+ *
+ * {@inheritdoc}
+ */
 }

@@ -44,9 +44,10 @@ function lesroidelareno_entity_presave(EntityInterface $entity) {
     
     /**
      * Objectif est d'ajouté le domaine encours à chaque element du panier.
-     * "commerce_order_item" porte les elements du panier
+     * "commerce_order_item" porte les elements du panier.
+     * (On ajoute cela egalement à d'autre entites).
      */
-    if ($entity_id == 'commerce_order_item') {
+    if ($entity_id == 'commerce_order_item' || $entity_id == 'payment_intents') {
       /**
        *
        * @var \Drupal\domain_source\HttpKernel\DomainSourcePathProcessor $domain_source
@@ -108,10 +109,8 @@ function lesroidelareno_entity_presave(EntityInterface $entity) {
          * pas de role adminitrator, alors on met à jour l'auteur.
          * ( cela ne fonctionne toujours pas par defafut ).
          * Lorsqu'un utilisateur cree un de ses contenus on force son id, car
-         * les
-         * informations pour initialiser la creation de l'entité peuvent
-         * provenir
-         * d'un autre entite creer par une autre personne.
+         * les informations pour initialiser la creation de l'entité peuvent
+         * provenir d'un autre entite creer par une autre personne.
          */
         if ($entity_id == 'blocks_contents' || $entity_id == 'node' || $entity_id == 'block_content' || $entity_id == 'commerce_product' || $entity_id == 'config_theme_entity') {
           $entity->setOwnerId($uid);

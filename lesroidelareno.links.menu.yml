@@ -19,3 +19,17 @@ lesroidelareno.mail_test_send_fulloptions:
   description: "permet de tester l'envoit de mail"
   parent: system.admin_config_system
   weight: 99
+
+# Commerce payment config menu items definition
+entity.commerce_payment_config.collection:
+  title: 'Commerce payment config list'
+  route_name: entity.commerce_payment_config.collection
+  description: 'List Commerce payment config entities'
+  parent: system.admin_structure
+  weight: 100
+
+commerce_payment_config.admin.structure.settings:
+  title: 'Commerce payment config settings'
+  description: 'Configure Commerce payment config entities'
+  route_name: commerce_payment_config.settings
+  parent: system.admin_structure

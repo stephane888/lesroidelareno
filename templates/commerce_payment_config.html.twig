@@ -1,0 +1,22 @@
+{#
+/**
+ * @file commerce_payment_config.html.twig
+ * Default theme implementation to present Commerce payment config data.
+ *
+ * This template is used when viewing Commerce payment config pages.
+ *
+ *
+ * Available variables:
+ * - content: A list of content items. Use 'content' to print all content, or
+ * - attributes: HTML attributes for the container element.
+ *
+ * @see template_preprocess_commerce_payment_config()
+ *
+ * @ingroup themeable
+ */
+#}
+<div{{ attributes.addClass('commerce_payment_config') }}>
+  {% if content %}
+    {{- content -}}
+  {% endif %}
+</div>

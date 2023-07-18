@@ -15,6 +15,12 @@ services:
     tags:
       - { name: event_subscriber, priority: 90 }
       
+  lesroidelareno.conditions:
+    class: Drupal\lesroidelareno\EventSubscriber\CommerceConditionEventsSubscriber
+    arguments: ['@entity_type.manager','@domain.negotiator','@messenger']
+    tags:
+      - { name: event_subscriber }    
+      
   lesroidelareno.test_php_mailer_plugin:
     class: Drupal\lesroidelareno\Plugin\Mail\TestPhpMailerPlugin
     arguments: []
@@ -23,3 +29,6 @@ services:
     class: Drupal\lesroidelareno\Plugin\Mail\WbhPhpMailerPlugin
     arguments: ['@config.factory','@module_handler','@email.validator','@renderer']
   
+  lesroidelareno.payement_gateway:
+    class: Drupal\lesroidelareno\Services\Payements\PayementGateWay
+    arguments: ['@domain.negotiator','@entity_type.manager','@entity.form_builder']
